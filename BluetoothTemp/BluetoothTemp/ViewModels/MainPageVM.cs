@@ -30,25 +30,31 @@ namespace BluetoothTemp.ViewModels
         //поиск других устройств).
         private BluetoothAdapter _bluetoothAdapter;
 
+        private BluetoothLeScanner _scanner;
+
+        private CustomScanCallback _scanCallback;
+
         //Команда подключения
-        public ICommand Connect { get; set; }
+        public ICommand Connect{ get; set; }
+        public ICommand ScanDevicesCommand { get; set; }
+        public ICommand OnOffBluetoothCommand { get; set; }
 
         //Список найденных устройств.
         public ObservableCollection<BluetoothDevice> BluetoothDevicesList { get; set; }
 
-        
 
-        //Флаг для проверки подключения (временно)
-        private string connectFlag;
-        public string ConnectFlag
+
+        
+        private string onOffBluetoothText;
+        public string OnOffBluetoothText
         {
             get 
             {
-                return connectFlag; 
+                return onOffBluetoothText; 
             }
             set 
             { 
-                connectFlag = value;
+                onOffBluetoothText = value;
                 OnPropertyChanged();
             }
         }
@@ -78,24 +84,34 @@ namespace BluetoothTemp.ViewModels
         {
             _bluetoothManager = (BluetoothManager)Android.App.Application.Context.GetSystemService("bluetooth");
             _bluetoothAdapter = _bluetoothManager.Adapter;
-            _bluetoothAdapter.Enable();
+
+            OnOffBluetoothText = _bluetoothAdapter.IsEnabled ? OnOffBluetoothText = "Off Bluetooth" : OnOffBluetoothText = "On Bluetooth";
+            OnOffBluetoothCommand = new Command(OnOffBluetooth);
+
+            ScanDevicesCommand = new Command(ScanDevices);
+
+            //_bluetoothAdapter.Enable();
+
             BluetoothDevicesList = new ObservableCollection<BluetoothDevice>();
-            BluetoothLeScanner scanner = _bluetoothAdapter.BluetoothLeScanner;
-            CustomScanCallback scanCallback = new CustomScanCallback(BluetoothDevicesList);
-            if (scanner != null) 
-            {
-                ScanSettings scanSettings = new ScanSettings.Builder()
-                .SetScanMode(Android.Bluetooth.LE.ScanMode.LowLatency)
-                .SetCallbackType(ScanCallbackType.AllMatches)
-                .SetMatchMode(BluetoothScanMatchMode.Aggressive)
-                .SetNumOfMatches(1)
-                .SetReportDelay(1)
-                .Build();
-                scanner.StartScan(filters: null, settings: scanSettings, callback: scanCallback);
-            }
             
+            
+            //ConnectFlag = "asd";
         }
-        
+
+        private void OnOffBluetooth()
+        {
+            if (_bluetoothAdapter.IsEnabled)
+            {
+                _bluetoothAdapter.Disable();
+                OnOffBluetoothText = "On Bluetooth";
+            }
+            else
+            {
+                _bluetoothAdapter.Enable();
+                OnOffBluetoothText = "Off Bluetooth";
+            }
+        }
+
         /*private async void EnableBluetooth()
         {
             BluetoothDevicesList.Clear();
@@ -115,7 +131,27 @@ namespace BluetoothTemp.ViewModels
             };
             await adapter.StartScanningForDevicesAsync();
         }*/
-        
+
+        private void ScanDevices()
+        {
+            if (_bluetoothAdapter.IsEnabled)
+            {
+                _scanner = _bluetoothAdapter.BluetoothLeScanner;
+                _scanCallback = new CustomScanCallback(BluetoothDevicesList);
+                if (_scanner != null)
+                {
+                    ScanSettings scanSettings = new ScanSettings.Builder()
+                    .SetScanMode(Android.Bluetooth.LE.ScanMode.LowLatency)
+                    .SetCallbackType(ScanCallbackType.AllMatches)
+                    .SetMatchMode(BluetoothScanMatchMode.Sticky)
+                    .SetNumOfMatches(1)
+                    .SetReportDelay(1)
+                    .Build();
+                    _scanner.StartScan(filters: null, settings: scanSettings, callback: _scanCallback);
+                }
+            }
+        }
+
         private async void OpenBluetoothDevicePage()
         {
             await App.Current.MainPage.Navigation.PushAsync(

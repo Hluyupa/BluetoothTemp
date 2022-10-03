@@ -30,6 +30,7 @@ namespace BluetoothTemp.Abstract
                 var device = _bluetoothDevices.FirstOrDefault(p => p.Equals(result.Device));
                 if (device == null)
                 {
+                    //result.Device.Name = result.ScanRecord.ServiceUuids;
                     _bluetoothDevices.Add(result.Device);
                 }
             }

@@ -8,10 +8,25 @@
     </ContentPage.BindingContext>
     <StackLayout 
         Orientation="Vertical">
-        <Label
-            Text="{Binding ConnectFlag}"
-            TextColor="YellowGreen"
-            FontSize="24"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="SCAN"
+                Command="{Binding ScanDevicesCommand}"/>
+            <Button
+                Grid.Row="0"
+                Grid.Column="1"
+                Text="{Binding OnOffBluetoothText}"
+                Command="{Binding OnOffBluetoothCommand}"/>
+        </Grid>
         <ListView
             ItemsSource="{Binding BluetoothDevicesList}"
             SelectedItem="{Binding SelectedBluetoothDevice}"
