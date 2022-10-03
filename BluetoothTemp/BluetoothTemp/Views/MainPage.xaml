@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:BluetoothTemp.ViewModels"
+             x:Class="BluetoothTemp.Views.MainPage">
+    <ContentPage.BindingContext>
+        <local:MainPageVM/>
+    </ContentPage.BindingContext>
+    <StackLayout 
+        Orientation="Vertical">
+        <Label
+            Text="{Binding ConnectFlag}"
+            TextColor="YellowGreen"
+            FontSize="24"/>
+        <ListView
+            ItemsSource="{Binding BluetoothDevicesList}"
+            SelectedItem="{Binding SelectedBluetoothDevice}"
+            
+            HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Label
+                                Grid.Row="0"
+                                Text="{Binding Name}"
+                                TextColor="Black"
+                                FontSize="24"/>
+                            <Label
+                                Grid.Row="1"
+                                Text="{Binding Address}"
+                                FontSize="16"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>
