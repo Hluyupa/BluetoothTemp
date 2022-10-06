@@ -20,7 +20,7 @@
                 Grid.Row="0"
                 Grid.Column="0"
                 Text="SCAN"
-                Command="{Binding ScanDevicesCommand}"/>
+                Command="{Binding ScanDevicesCommand }"/>
             <Button
                 Grid.Row="0"
                 Grid.Column="1"

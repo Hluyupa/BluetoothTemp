@@ -1,8 +1,11 @@
 ﻿using Android.Bluetooth;
+using BluetoothTemp.Abstract;
+using BluetoothTemp.Models;
 using Java.IO;
 using Java.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -22,6 +25,10 @@ namespace BluetoothTemp.ViewModels
         //Сокет по которому будет происходить "общение" с
         //Bluetooth устройством
         private BluetoothSocket _socket;
+
+        private BluetoothAPI bluetoothAPI;
+
+        public ObservableCollection<BluetoothGattService> Services { get; set; }
 
         //Информация о соединении с Bluetooth устройством
         private string connectionInfo;
@@ -58,10 +65,14 @@ namespace BluetoothTemp.ViewModels
 
         public BluetoothDevicePageVM(BluetoothDevice bluetoothDevice)
         {
+            bluetoothAPI = BluetoothAPI.GetInstance();
             BluetoothDevice = bluetoothDevice;
+            Services = new ObservableCollection<BluetoothGattService>();
+            bluetoothAPI.ConnectAndGetServices(BluetoothDevice, Services);
+            
             ConnectionInfo = "Waiting connection";
-            SendMessage = new Command(Write);
-            ConnectBluetoothDevice();
+            /*SendMessage = new Command(Write);
+            ConnectBluetoothDevice();*/
         }
 
         //
@@ -96,7 +107,7 @@ namespace BluetoothTemp.ViewModels
 
 
         //Метод подключения к Bluetooth устройству
-        private async void ConnectBluetoothDevice()
+       /* private async void ConnectBluetoothDevice()
         {
             _socket = BluetoothDevice.CreateInsecureRfcommSocketToServiceRecord(UUID.FromString(_UUID));
             try
@@ -117,9 +128,10 @@ namespace BluetoothTemp.ViewModels
             byte[] buffer = Encoding.UTF8.GetBytes(InputInfo);
             await _socket.OutputStream.WriteAsync(buffer, 0, buffer.Length);
         }
+
         private async void Read()
         {
-            byte[] buffer;   
+            byte[] buffer;
             while (_socket.IsConnected)
             {
                 try
@@ -133,7 +145,7 @@ namespace BluetoothTemp.ViewModels
                     break;
                 }
             }
-        }
+        }*/
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string property = "")
@@ -143,7 +155,8 @@ namespace BluetoothTemp.ViewModels
 
         public void Dispose()
         {
-            _socket.Close();
+            //_socket.Close();
+            bluetoothAPI.Disconnect();
         }
     }
 }
