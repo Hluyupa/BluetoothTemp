@@ -30,7 +30,6 @@
         <ListView
             ItemsSource="{Binding BluetoothDevicesList}"
             SelectedItem="{Binding SelectedBluetoothDevice}"
-            
             HasUnevenRows="True">
             <ListView.ItemTemplate>
                 <DataTemplate>

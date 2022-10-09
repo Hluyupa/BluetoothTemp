@@ -11,24 +11,52 @@
            
         </Grid.RowDefinitions>
         <Label
+            
             Grid.Row="0"
             HorizontalOptions="Center"
-            VerticalOptions="Center"
+            VerticalOptions="Start"
             Text="{Binding ConnectionInfo}"
             FontSize="24"
             TextColor="Black"/>
         <ListView
             Grid.Row="1"
-            ItemsSource="{Binding Services}">
+            ItemsSource="{Binding DeviceCharacteristicsList}"
+            HasUnevenRows="True">
+            
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
-                        <Label
-                            Text="{Binding InstanceId}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Text="{Binding Name}"
+                                TextColor="Black"
+                                FontSize="24"/>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Text="{Binding Value}"
+                                FontSize="16"/>
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Text="{Binding UUID}"
+                                FontSize="16"/>
+                        </Grid>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+       
         <!--<Grid
             Grid.Row="1"
             HorizontalOptions="Fill"

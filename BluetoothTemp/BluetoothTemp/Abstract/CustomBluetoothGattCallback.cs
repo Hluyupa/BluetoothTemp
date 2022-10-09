@@ -1,6 +1,7 @@
 ﻿using Android.Bluetooth;
 using Android.Runtime;
 using BluetoothTemp.Models;
+using Java.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,31 +11,17 @@ namespace BluetoothTemp.Abstract
 {
     public class CustomBluetoothGattCallback : BluetoothGattCallback
     {
-        //private Queue<>
-        private ICollection<BluetoothGattService> _services;
-      
-        public CustomBluetoothGattCallback(ICollection<BluetoothGattService> services)
-        {
-            _services = services;
-        }
+        public event Action<BluetoothGattCharacteristic> CharacteristicReadEvent;
+        public event Action<BluetoothGattCharacteristic> CharacteristicChangedEvent;
+        public event Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChangeEvent;
+
+        public event Action ServicesDiscoveredEvent;
+
         public override void OnConnectionStateChange(BluetoothGatt gatt, [GeneratedEnum] GattStatus status, [GeneratedEnum] ProfileState newState)
         {
             base.OnConnectionStateChange(gatt, status, newState);
-            if (status == GattStatus.Success)
-            {
-                if (newState == ProfileState.Connected)
-                {
-                    gatt.DiscoverServices();
-                }
-                else if (newState == ProfileState.Disconnected)
-                {
-                    gatt.Close();
-                }
-            }
-            else
-            {
-                gatt.Close();
-            }
+
+            ConnectionStateChangeEvent?.Invoke(gatt, status, newState);
         }
 
         public override void OnServicesDiscovered(BluetoothGatt gatt, [GeneratedEnum] GattStatus status)
@@ -45,25 +32,20 @@ namespace BluetoothTemp.Abstract
                 gatt.Disconnect();
                 return;
             }
-            foreach (var service in gatt.Services)
-            {
-                if (!_services.Contains(service))
-                {
-                    _services.Add(service);
-                }
-            }
-            //_services = gatt.Services;
-            
-            //gatt.ReadCharacteristic(services[0].Characteristics[0]);
         }
 
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, [GeneratedEnum] GattStatus status)
         {
             base.OnCharacteristicRead(gatt, characteristic, status);
-            byte[] buffer = new byte[characteristic.GetValue().Length];
-            Array.Copy(characteristic.GetValue(), 0, buffer, 0, characteristic.GetValue().Length);
-            var a = Encoding.UTF8.GetString(buffer);
+            
+            CharacteristicReadEvent?.Invoke(characteristic);
         }
-        
+
+        public override void OnCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+        {
+            base.OnCharacteristicChanged(gatt, characteristic);
+            
+            CharacteristicChangedEvent?.Invoke(characteristic);
+        }
     }
 }

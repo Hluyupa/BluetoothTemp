@@ -28,7 +28,7 @@ namespace BluetoothTemp.ViewModels
 
         private BluetoothAPI bluetoothAPI;
 
-        public ObservableCollection<BluetoothGattService> Services { get; set; }
+        public ObservableCollection<DeviceCharacteristicModel> DeviceCharacteristicsList { get; set; }
 
         //Информация о соединении с Bluetooth устройством
         private string connectionInfo;
@@ -60,30 +60,14 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-        //Команда отправки сообщения
-        public ICommand SendMessage { get; set; }
-
-        public BluetoothDevicePageVM(BluetoothDevice bluetoothDevice)
-        {
-            bluetoothAPI = BluetoothAPI.GetInstance();
-            BluetoothDevice = bluetoothDevice;
-            Services = new ObservableCollection<BluetoothGattService>();
-            bluetoothAPI.ConnectAndGetServices(BluetoothDevice, Services);
-            
-            ConnectionInfo = "Waiting connection";
-            /*SendMessage = new Command(Write);
-            ConnectBluetoothDevice();*/
-        }
-
-        //
         private string outputInfo;
         public string OutputInfo
         {
-            get 
+            get
             {
-                return outputInfo; 
+                return outputInfo;
             }
-            set 
+            set
             {
                 outputInfo = value;
                 OnPropertyChanged();
@@ -93,18 +77,35 @@ namespace BluetoothTemp.ViewModels
         private string inputInfo;
         public string InputInfo
         {
-            get 
+            get
             {
                 return inputInfo;
             }
-            set 
-            { 
+            set
+            {
                 inputInfo = value;
-                OnPropertyChanged(); 
+                OnPropertyChanged();
             }
         }
 
+        //Команда отправки сообщения
+        public ICommand SendMessage { get; set; }
 
+        public BluetoothDevicePageVM(BluetoothDevice bluetoothDevice)
+        {
+            bluetoothAPI = BluetoothAPI.GetInstance();
+            DeviceCharacteristicsList = new ObservableCollection<DeviceCharacteristicModel>();
+            bluetoothAPI.DeviceCharacterisctics = DeviceCharacteristicsList;
+            BluetoothDevice = bluetoothDevice;
+            ConnectionInfo = "Waiting connection";
+            bluetoothAPI.Connect(BluetoothDevice);
+            //bluetoothAPI.Read();
+            
+            /*SendMessage = new Command(Write);
+            ConnectBluetoothDevice();*/
+            
+            
+        }
 
         //Метод подключения к Bluetooth устройству
        /* private async void ConnectBluetoothDevice()
