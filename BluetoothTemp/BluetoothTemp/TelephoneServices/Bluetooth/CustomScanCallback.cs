@@ -8,30 +8,23 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms.Internals;
 
-namespace BluetoothTemp.Abstract
+namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
     public class CustomScanCallback : ScanCallback
     {
-        private ICollection<BluetoothDevice> _bluetoothDevices;
-        public CustomScanCallback(ICollection<BluetoothDevice> bluetoothDevices)
-        {
-            _bluetoothDevices = bluetoothDevices;
-        }
+        public Action<IList<ScanResult>> BatchScanResultsEvent { get; set; }
+        public Action<ScanCallbackType, ScanResult> ScanResultEvent { get; set; }
+
         public override void OnScanResult([GeneratedEnum] ScanCallbackType callbackType, ScanResult result)
         {
             base.OnScanResult(callbackType, result);
+            ScanResultEvent.Invoke(callbackType, result);
         }
         public override void OnBatchScanResults(IList<ScanResult> results)
         {
             base.OnBatchScanResults(results);
-            foreach (var result in results)
-            {
-                var device = _bluetoothDevices.FirstOrDefault(p => p.Equals(result.Device));
-                if (device == null)
-                {
-                    _bluetoothDevices.Add(result.Device);
-                }
-            }
+            BatchScanResultsEvent.Invoke(results);
+            
         }
 
         public override void OnScanFailed([GeneratedEnum] ScanFailure errorCode)

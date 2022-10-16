@@ -13,11 +13,11 @@ namespace BluetoothTemp.Droid
     {
         private readonly string[] Permissions =
         {
-            Manifest.Permission.Bluetooth,
-            Manifest.Permission.BluetoothAdmin,
+            Manifest.Permission.BluetoothScan,
+            Manifest.Permission.BluetoothConnect,
+            Manifest.Permission.BluetoothAdvertise,
             Manifest.Permission.AccessCoarseLocation,
-            Manifest.Permission.AccessFineLocation,
-            Manifest.Permission.BluetoothConnect
+            Manifest.Permission.AccessFineLocation
         };
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -26,7 +26,10 @@ namespace BluetoothTemp.Droid
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            CheckPermissions();
+            RequestPermissions(Permissions, 2);
+            /*RequestPermissions(new string[] { Manifest.Permission.AccessCoarseLocation, Manifest.Permission.AccessFineLocation } , 2);*/
+           
+            //CheckPermissions();
             LoadApplication(new App());
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -50,7 +53,7 @@ namespace BluetoothTemp.Droid
 
             if (!minimumPermissionsGranted)
             {
-                RequestPermissions(Permissions, 0);
+                RequestPermissions(Permissions, 2);
             }
         }
     }

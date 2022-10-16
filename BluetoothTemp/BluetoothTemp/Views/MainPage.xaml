@@ -28,7 +28,7 @@
                 Command="{Binding OnOffBluetoothCommand}"/>
         </Grid>
         <ListView
-            ItemsSource="{Binding BluetoothDevicesList}"
+            ItemsSource="{Binding ScannedBluetoothDevicesList}"
             SelectedItem="{Binding SelectedBluetoothDevice}"
             HasUnevenRows="True">
             <ListView.ItemTemplate>
@@ -46,7 +46,7 @@
                                 FontSize="24"/>
                             <Label
                                 Grid.Row="1"
-                                Text="{Binding Address}"
+                                Text="{Binding Device.Address}"
                                 FontSize="16"/>
                         </Grid>
                     </ViewCell>

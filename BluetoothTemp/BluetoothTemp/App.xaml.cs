@@ -2,7 +2,6 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using BluetoothTemp.Views;
-using Plugin.BLE.Abstractions.Contracts;
 
 namespace BluetoothTemp
 {
