@@ -27,6 +27,7 @@ namespace BluetoothTemp.ViewModels
 
         //Команда вкл/выкл bluetooth
         public ICommand OnOffBluetoothCommand { get; set; }
+        public ICommand StartScanNfcCommand { get; set; }
 
         //Список найденных устройств.
         public ObservableCollection<ScannedBluetoothDeviceModel> ScannedBluetoothDevicesList { get; set; }
@@ -77,6 +78,17 @@ namespace BluetoothTemp.ViewModels
                 _bluetoothAPI.OnOffBluetooth(() => OnOffBluetoothText = "Off Bluetooth", () => OnOffBluetoothText = "On Bluetooth");
             });
             ScanDevicesCommand = new Command(() => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList));
+            StartScanNfcCommand = new Command(OpenNfcPage);
+        }
+
+        private async void OpenNfcPage()
+        {
+            await App.Current.MainPage.Navigation.PushAsync(
+                new NfcReaderPage
+                {
+                    BindingContext = new NfcReaderPageVM()
+                }
+            );
         }
         private async void OpenBluetoothDevicePage()
         {

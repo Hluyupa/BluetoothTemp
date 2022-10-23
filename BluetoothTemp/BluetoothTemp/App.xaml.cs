@@ -2,12 +2,13 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using BluetoothTemp.Views;
+using Android.App;
 
 namespace BluetoothTemp
 {
-    public partial class App : Application
+    public partial class App : Xamarin.Forms.Application
     {
-        public App()
+        public App(Activity activity)
         {
             InitializeComponent();
             
@@ -16,7 +17,7 @@ namespace BluetoothTemp
 
         protected override void OnStart()
         {
-
+            
         }
 
         protected override void OnSleep()

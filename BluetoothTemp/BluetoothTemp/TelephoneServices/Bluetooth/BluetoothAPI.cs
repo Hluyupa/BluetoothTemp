@@ -60,6 +60,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         public ICollection<DeviceCharacteristicModel> DeviceCharacterisctics { get; set; }
         public ICollection<ScannedBluetoothDeviceModel> ScannedDevices { get; set; }
 
+        public Queue<Action> CommandQueue;
         public BluetoothDeviceInfoModel bluetoothDeviceInfo { get; set; }
         public BluetoothDeviceInfoModel ble { get; set; }
 
@@ -71,7 +72,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 
             scanCallback = new CustomScanCallback();
             filters = new List<ScanFilter>();
-            
+            CommandQueue = new Queue<Action>();
+
             scanCallback.BatchScanResultsEvent += BatchScanResults;
             scanCallback.ScanResultEvent += ScanResult;
 
@@ -250,6 +252,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     DeviceCharacterisctics.Add(new DeviceCharacteristicModel { Name = "N/A", Value = value, UUID = uuidHeader });
                     break;
             }
+            CompletedCommand();
         }
 
         //Метод, выполняющийся при получении уведомления об обновлении характеристики.
@@ -276,6 +279,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
                 else
                 {
+                    
                     if (trialsCount > 10)
                     {
                         return;
@@ -295,16 +299,37 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                         case "00002a1f":
                         case "00002a19":
                         case "00002a25":
-                            _gatt.ReadCharacteristic(characteristic);
+                            CommandQueue.Enqueue(() => _gatt.ReadCharacteristic(characteristic));
                             break;
                         default:
                             break;
                     }
-                    
-                    await Task.Delay(500);
                 }
             }
+            NextCommand();
+            
+        }
 
+        private void NextCommand()
+        {
+            if (CommandQueue.Count > 0)
+            {
+                CommandQueue.Peek().Invoke();
+            }
+            else
+            {
+                CompositeAndSendJson();
+            }
+        }
+
+        private void CompletedCommand()
+        {
+            CommandQueue.Dequeue();
+            NextCommand();
+        }
+
+        private void CompositeAndSendJson()
+        {
             var dateTime = DateTime.UtcNow;
             var timeStamp = (int)(dateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
             bluetoothDeviceInfo.Time = timeStamp.ToString();
@@ -315,7 +340,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             };
             var request = new RestRequest("https://temp.skid.su/api/v1/data", Method.Post).AddJsonBody(JsonConvert.SerializeObject(arr));
             var responce = Client.GetInstance().restClient.Execute(request);
-            if (responce.StatusCode==System.Net.HttpStatusCode.OK)
+            if (responce.StatusCode == System.Net.HttpStatusCode.OK)
             {
 
             }
