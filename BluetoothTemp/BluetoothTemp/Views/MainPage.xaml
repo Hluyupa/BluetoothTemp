@@ -28,8 +28,6 @@
                 Text="{Binding OnOffBluetoothText}"
                 Command="{Binding OnOffBluetoothCommand}"/>
             <Button
-                x:Name="asd"
-                x:Uid="btn1"
                 Grid.Row="0"
                 Grid.Column="2"
                 Text="SCAN NFC"

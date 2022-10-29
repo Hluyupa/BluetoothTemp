@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BluetoothTemp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,13 @@ namespace BluetoothTemp.Views
         public NfcReaderPage()
         {
             InitializeComponent();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            var viewModel = (NfcReaderPageVM)this.BindingContext;
+            viewModel.Dispose();
         }
     }
 }

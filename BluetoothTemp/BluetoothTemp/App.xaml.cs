@@ -3,14 +3,21 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using BluetoothTemp.Views;
 using Android.App;
+using BluetoothTemp.Abstract;
+using BluetoothTemp.Models.EFModels;
 
 namespace BluetoothTemp
 {
     public partial class App : Xamarin.Forms.Application
     {
-        public App(Activity activity)
+        public const string DbFilename = "bluetoothTempApp.db3";
+        public static INfcAPI NfcAPI { get; private set; }
+        public App(INfcAPI nfcAPI)
         {
+           
             InitializeComponent();
+            NfcAPI = nfcAPI;
+            
             
             MainPage = new NavigationPage(new MainPage());
         }

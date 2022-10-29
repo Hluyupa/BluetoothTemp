@@ -52,19 +52,24 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 
         private BluetoothGatt _gatt;
 
-        //Счётчик попыток подключения
-        private int trialConnectedCounter = 0;
-
         //Список характеристик подключенного устрйоства. 
         //Необходимо передать извне ссылку на коллекцию.
         public ICollection<DeviceCharacteristicModel> DeviceCharacterisctics { get; set; }
+        
+        //Список обнаруженных устройств
         public ICollection<ScannedBluetoothDeviceModel> ScannedDevices { get; set; }
 
+        //Очередь команд
         public Queue<Action> CommandQueue;
         public BluetoothDeviceInfoModel bluetoothDeviceInfo { get; set; }
-        public BluetoothDeviceInfoModel ble { get; set; }
+
+        //Событие, срабатывающее после прочтения всех характеристик.
+        public event Action EventAfterReading;
 
         private static BluetoothAPI _instance;
+
+        //В конструкторе происходит инициализация Bluetooth адаптера,
+        //колбеков, списков и настроек сканирования.
         private BluetoothAPI()
         {
             bluetoothManager = (BluetoothManager)Android.App.Application.Context.GetSystemService("bluetooth");
@@ -163,6 +168,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         {
             bluetoothDeviceInfo = new BluetoothDeviceInfoModel();
             _device = device;
+            
             //Проверка на то, находится ли Bluetooth устройство в кеше Bluetooth.
             //Если нет, то это устройство сканируется отдельно,
             //при этом останавливается общее сканирование.
@@ -226,7 +232,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         }
 
         //Метод, выполняющийся при чтении характеристики.
-        //Он передаётся в качестве события объекту BluetoothGattCallback
+        //Также сообщает очереди команд о завершении чтения характеристики.
+        //Он передаётся в качестве события объекту BluetoothGattCallback.
         private void CharacteristicRead(BluetoothGattCharacteristic characteristic)
         {
             byte[] buffer = new byte[characteristic.GetValue().Length];
@@ -266,7 +273,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         }
 
       
-        //Поиск сервисов и чтение их характеристик
+        //Поиск сервисов, добавление команд чтения характеристик
+        //в очередь на выполение и её запуск.
         public async void Read()
         {
             int trialsCount = 0;
@@ -293,7 +301,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             {
                 foreach (var characteristic in service.Characteristics)
                 {
-                    //ПЕРЕПИСАТЬ В ОЧЕРЕДЬ (БЕЗ ЯВНОЙ ЗАДЕРЖКИ)
                     switch (characteristic.Uuid.ToString().ToLower().Substring(0, 8))
                     {
                         case "00002a1f":
@@ -307,9 +314,9 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
             }
             NextCommand();
-            
         }
 
+        //Запуск следующей команды
         private void NextCommand()
         {
             if (CommandQueue.Count > 0)
@@ -319,15 +326,18 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             else
             {
                 CompositeAndSendJson();
+                EventAfterReading?.Invoke();
             }
         }
 
+        //Удаление выполненной команды
         private void CompletedCommand()
         {
             CommandQueue.Dequeue();
             NextCommand();
         }
 
+        //Метод отправки данных на сервер.
         private void CompositeAndSendJson()
         {
             var dateTime = DateTime.UtcNow;

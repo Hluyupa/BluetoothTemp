@@ -17,6 +17,8 @@ namespace BluetoothTemp.Views
         {
             InitializeComponent();
         }
+
+        //Вызывается, когда страница закрывается.
         protected override void OnDisappearing()
         {
             base.OnDisappearing();

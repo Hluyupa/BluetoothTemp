@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
            
         </Grid.RowDefinitions>
         <Label
@@ -55,7 +56,23 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-       
+        <Grid
+            Margin="10"
+            Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Label
+                FontSize="18"
+                Grid.Column="0"
+                Text="Установка автоподключения:"/>
+            <Switch
+                Grid.Column="1"
+                IsToggled="{Binding IsAutoconnect}"/>
+        </Grid>
+        
+
         <!--<Grid
             Grid.Row="1"
             HorizontalOptions="Fill"

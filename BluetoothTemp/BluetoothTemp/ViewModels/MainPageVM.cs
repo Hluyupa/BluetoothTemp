@@ -1,6 +1,7 @@
 ﻿using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.Content;
+using BluetoothTemp.Abstract;
 using BluetoothTemp.Models;
 using BluetoothTemp.TelephoneServices.Bluetooth;
 using BluetoothTemp.Views;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ using Xamarin.Forms;
 
 namespace BluetoothTemp.ViewModels
 {
-    public class MainPageVM : INotifyPropertyChanged
+    public class MainPageVM : BaseViewModel, INotifyPropertyChanged
     {
         //Объект класса для работы с Bluetooth
         private BluetoothAPI _bluetoothAPI;
@@ -62,7 +64,6 @@ namespace BluetoothTemp.ViewModels
                     selectedBluetoothDevice = value;
                     OpenBluetoothDevicePage();
                     OnPropertyChanged();
-                    
                 }
             }
         }
@@ -78,22 +79,14 @@ namespace BluetoothTemp.ViewModels
                 _bluetoothAPI.OnOffBluetooth(() => OnOffBluetoothText = "Off Bluetooth", () => OnOffBluetoothText = "On Bluetooth");
             });
             ScanDevicesCommand = new Command(() => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList));
-            StartScanNfcCommand = new Command(OpenNfcPage);
+
+            StartScanNfcCommand = new Command(OpenNfcReaderPage);
         }
 
-        private async void OpenNfcPage()
-        {
-            await App.Current.MainPage.Navigation.PushAsync(
-                new NfcReaderPage
-                {
-                    BindingContext = new NfcReaderPageVM()
-                }
-            );
-        }
         private async void OpenBluetoothDevicePage()
         {
             var context = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device);
-            context.DisposeEvent += () => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList); 
+            context.DisposeEvent = () => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList);
             await App.Current.MainPage.Navigation.PushAsync(
                 new BluetoothDevicePage
                 {
@@ -102,10 +95,14 @@ namespace BluetoothTemp.ViewModels
             );
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string property = "")
+        private async void OpenNfcReaderPage()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+            await App.Current.MainPage.Navigation.PushAsync(
+                new NfcReaderPage
+                {
+                    BindingContext = new NfcReaderPageVM()
+                }
+            );
         }
     }
 }

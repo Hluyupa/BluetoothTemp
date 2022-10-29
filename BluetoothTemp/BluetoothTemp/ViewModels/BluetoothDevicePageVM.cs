@@ -1,6 +1,7 @@
 ﻿using Android.Bluetooth;
-
+using BluetoothTemp.Abstract;
 using BluetoothTemp.Models;
+using BluetoothTemp.Models.EFModels;
 using BluetoothTemp.TelephoneServices.Bluetooth;
 using Java.IO;
 using Java.Util;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
@@ -17,13 +19,25 @@ using Xamarin.Forms;
 
 namespace BluetoothTemp.ViewModels
 {
-    public class BluetoothDevicePageVM : INotifyPropertyChanged, IDisposable
+    public class BluetoothDevicePageVM : BaseViewModel, INotifyPropertyChanged, IDisposable
     {
         //Событие уничтожения объекта
-        public event Action DisposeEvent;
-
+        public Action DisposeEvent;
+        
         private BluetoothAPI bluetoothAPI;
-        public ObservableCollection<DeviceCharacteristicModel> DeviceCharacteristicsList { get; set; }
+        public ObservableCollection<DeviceCharacteristicModel> deviceCharacteristicsList;
+        public ObservableCollection<DeviceCharacteristicModel> DeviceCharacteristicsList 
+        { 
+            get 
+            {
+                return deviceCharacteristicsList;
+            } 
+            set
+            {
+                deviceCharacteristicsList = value;
+                OnPropertyChanged();
+            } 
+        }
 
         //Информация о соединении с Bluetooth устройством
         private string connectionInfo;
@@ -55,58 +69,108 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-        private string outputInfo;
-        public string OutputInfo
+        private bool isAutoconnect;
+        public bool IsAutoconnect
         {
-            get
-            {
-                return outputInfo;
+            get 
+            { 
+                return isAutoconnect; 
             }
-            set
-            {
-                outputInfo = value;
+            set 
+            { 
+                isAutoconnect = value;
                 OnPropertyChanged();
+                if (!isPageLoading)
+                {
+                    using (var context = new ApplicationContext(_dbPath)) 
+                    {
+                        var device = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
+                        if (isAutoconnect)
+                            device.IsAutoconnect = Convert.ToInt32(true);
+                        else
+                            device.IsAutoconnect = Convert.ToInt32(false);
+                        context.SaveChanges();
+                    }
+                }
+                isPageLoading = false;
             }
         }
 
-        private string inputInfo;
-        public string InputInfo
-        {
-            get
-            {
-                return inputInfo;
-            }
-            set
-            {
-                inputInfo = value;
-                OnPropertyChanged();
-            }
-        }
 
         //Команда отправки сообщения
         public ICommand SendMessage { get; set; }
 
+        private string _dbPath;
+
+        private bool isPageLoading;
         public BluetoothDevicePageVM(BluetoothDevice bluetoothDevice)
         {
+            isPageLoading = true;
+
             bluetoothAPI = BluetoothAPI.GetInstance();
             DeviceCharacteristicsList = new ObservableCollection<DeviceCharacteristicModel>();
             bluetoothAPI.DeviceCharacterisctics = DeviceCharacteristicsList;
             BluetoothDevice = bluetoothDevice;
+
             ConnectionInfo = "Waiting connection";
             bluetoothAPI.Connect(BluetoothDevice);
-            //bluetoothAPI.Read();
-            
-            /*SendMessage = new Command(Write);
-            ConnectBluetoothDevice();*/
-            
-            
+            bluetoothAPI.EventAfterReading += AfterReadingInfo;
+            App.NfcAPI.WritingNfcEvent += AfterWritingNfc;
+
+            _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
+            using (var context = new ApplicationContext(_dbPath))
+            {
+                /*var device = new BluetoothDeviceWasСonnected() { MacAddress = bluetoothDevice.Address, IsAutoconnect = false, IsNfcWrited = false };
+                context.BluetoothDevicesWasСonnected.Add(device);*/
+                var bluetotohDeviceWasConnected = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
+                if (bluetotohDeviceWasConnected == null)
+                {
+                    var device = new BluetoothDeviceWasСonnected() { MacAddress = bluetoothDevice.Address, IsAutoconnect = 0, IsNfcWrited = 0 };
+                    context.BluetoothDevicesWasСonnected.Add(device);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    IsAutoconnect = Convert.ToBoolean(bluetotohDeviceWasConnected.IsAutoconnect);
+                }
+                /*context.BluetoothDevicesWasСonnected.Add(new BluetoothDeviceWasСonnected() { Id = 1, MacAddress = "123123", IsAutoconnect = 0, IsNfcWrited = 0 });
+                context.BluetoothDevicesWasСonnected.Add(new BluetoothDeviceWasСonnected() { Id = 2, MacAddress = "567567", IsAutoconnect = 0, IsNfcWrited = 0 });
+                context.SaveChanges();
+                string value = null;
+                foreach (var item in context.BluetoothDevicesWasСonnected)
+                {
+                    value += item.MacAddress;
+                }
+                App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("Test", value, "Ok");*/
+            }
+
         }
 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string property = "")
+        private void AfterReadingInfo()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+            Device.BeginInvokeOnMainThread(async () => 
+            {
+                bool request = await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Вы хотите записать серийный номер устройства в NFC метку", "Да", "Нет");
+                if (request)
+                {
+                    App.NfcAPI.StartScanning();
+                    App.NfcAPI.Write(DeviceCharacteristicsList.FirstOrDefault(p => p.Name.Equals("Серийный номер")).Value);
+                    bool canceled =  await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Поднесите устройство к NFC метке для записи", null, "Отмена");
+                    if (canceled)
+                    {
+                        App.NfcAPI.StopScanning();
+                    }
+                }
+            });
+        }
+
+        private void AfterWritingNfc()
+        {
+            Device.BeginInvokeOnMainThread(async () =>
+            {
+                await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Запись произошла успешна", "Ок");
+            });
+            App.NfcAPI.WritingNfcEvent -= AfterWritingNfc;
         }
 
         public void Dispose()

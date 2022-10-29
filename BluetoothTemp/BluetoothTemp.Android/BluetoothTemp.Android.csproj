@@ -65,14 +65,19 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite">
+      <Version>3.1.30</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.7.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2196" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomReaderCallback.cs" />
-    <Compile Include="MainActivity.cs" />
+    <Compile Include="Activities\NfcAPI.cs" />
+    <Compile Include="AndroidDbPath.cs" />
+    <Compile Include="Callbacks\NfcCallback\CustomReaderCallback.cs" />
+    <Compile Include="Activities\MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
