@@ -32,6 +32,7 @@ namespace BluetoothTemp.Droid.Activities
         {
             _activity = activity;
             _nfcAdapter = NfcAdapter.GetDefaultAdapter(_activity);
+
         }
 
         public void StartScanning()
@@ -67,12 +68,16 @@ namespace BluetoothTemp.Droid.Activities
         {
             _tagDiscoveredDelegate = () =>
             {
-                NdefRecord[] ndefRecords = _ndef.NdefMessage.GetRecords();
-                byte[] ndefValue = ndefRecords[0].GetPayload();
-                byte[] mainValue = new byte[ndefValue.Length - 3];
-                Array.Copy(ndefValue, 3, mainValue, 0, mainValue.Length);
-                string text = Encoding.UTF8.GetString(mainValue);
-                ReadingNfcEvent?.Invoke(text);
+                
+                if (_ndef.NdefMessage != null)
+                {
+                    NdefRecord[] ndefRecords = _ndef.NdefMessage.GetRecords();
+                    byte[] ndefValue = ndefRecords[0].GetPayload();
+                    byte[] mainValue = new byte[ndefValue.Length - 3];
+                    Array.Copy(ndefValue, 3, mainValue, 0, mainValue.Length);
+                    string text = Encoding.UTF8.GetString(mainValue);
+                    ReadingNfcEvent?.Invoke(text);
+                }
             };
         }
 

@@ -120,8 +120,6 @@ namespace BluetoothTemp.ViewModels
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
             using (var context = new ApplicationContext(_dbPath))
             {
-                /*var device = new BluetoothDeviceWasСonnected() { MacAddress = bluetoothDevice.Address, IsAutoconnect = false, IsNfcWrited = false };
-                context.BluetoothDevicesWasСonnected.Add(device);*/
                 var bluetotohDeviceWasConnected = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
                 if (bluetotohDeviceWasConnected == null)
                 {
@@ -133,17 +131,7 @@ namespace BluetoothTemp.ViewModels
                 {
                     IsAutoconnect = Convert.ToBoolean(bluetotohDeviceWasConnected.IsAutoconnect);
                 }
-                /*context.BluetoothDevicesWasСonnected.Add(new BluetoothDeviceWasСonnected() { Id = 1, MacAddress = "123123", IsAutoconnect = 0, IsNfcWrited = 0 });
-                context.BluetoothDevicesWasСonnected.Add(new BluetoothDeviceWasСonnected() { Id = 2, MacAddress = "567567", IsAutoconnect = 0, IsNfcWrited = 0 });
-                context.SaveChanges();
-                string value = null;
-                foreach (var item in context.BluetoothDevicesWasСonnected)
-                {
-                    value += item.MacAddress;
-                }
-                App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("Test", value, "Ok");*/
             }
-
         }
 
         private void AfterReadingInfo()

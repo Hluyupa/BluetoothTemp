@@ -6,6 +6,9 @@
     <ContentPage.BindingContext>
         <local:MainPageVM/>
     </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <StyleSheetExtension Source="/Styles/MainPageStyle.css"/>
+    </ContentPage.Resources>
     <StackLayout 
         Orientation="Vertical">
         <Grid>
@@ -18,6 +21,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Button
+                StyleClass="testClass"
                 Grid.Row="0"
                 Grid.Column="0"
                 Text="SCAN"

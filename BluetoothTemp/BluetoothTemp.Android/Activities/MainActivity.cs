@@ -40,10 +40,11 @@ namespace BluetoothTemp.Droid.Activities
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             //RequestPermissions(Permissions, 2);
             /*RequestPermissions(new string[] { Manifest.Permission.AccessCoarseLocation, Manifest.Permission.AccessFineLocation } , 2);*/
-           
-            CheckPermissions();
+
+            //CheckPermissions();
+            RequestPermissions(Permissions, 2);
             LoadApplication(new App(new NfcAPI(this)));
-           
+            
         }
 
        
