@@ -41,8 +41,8 @@ namespace BluetoothTemp.Droid.Activities
             //RequestPermissions(Permissions, 2);
             /*RequestPermissions(new string[] { Manifest.Permission.AccessCoarseLocation, Manifest.Permission.AccessFineLocation } , 2);*/
 
-            //CheckPermissions();
-            RequestPermissions(Permissions, 2);
+            CheckPermissions();
+            //RequestPermissions(Permissions, 2);
             LoadApplication(new App(new NfcAPI(this)));
             
         }

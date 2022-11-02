@@ -2,66 +2,49 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:BluetoothTemp.ViewModels"
+             xmlns:behaviors="clr-namespace:Xamarin.CommunityToolkit.Behaviors;assembly=Xamarin.CommunityToolkit"
              x:Class="BluetoothTemp.Views.MainPage">
     <ContentPage.BindingContext>
         <local:MainPageVM/>
     </ContentPage.BindingContext>
-    <ContentPage.Resources>
-        <StyleSheetExtension Source="/Styles/MainPageStyle.css"/>
-    </ContentPage.Resources>
-    <StackLayout 
-        Orientation="Vertical">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button
-                StyleClass="testClass"
-                Grid.Row="0"
-                Grid.Column="0"
-                Text="SCAN"
-                Command="{Binding ScanDevicesCommand }"/>
-            <Button
-                Grid.Row="0"
-                Grid.Column="1"
-                Text="{Binding OnOffBluetoothText}"
-                Command="{Binding OnOffBluetoothCommand}"/>
-            <Button
-                Grid.Row="0"
-                Grid.Column="2"
-                Text="SCAN NFC"
-                Command="{Binding StartScanNfcCommand}"/>
-        </Grid>
-        <ListView
-            ItemsSource="{Binding ScannedBluetoothDevicesList}"
-            SelectedItem="{Binding SelectedBluetoothDevice}"
-            HasUnevenRows="True">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <Label
-                                Grid.Row="0"
-                                Text="{Binding Name}"
-                                TextColor="Black"
-                                FontSize="24"/>
-                            <Label
-                                Grid.Row="1"
-                                Text="{Binding Device.Address}"
-                                FontSize="16"/>
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </StackLayout>
+    
+   
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button
+            HeightRequest="100"
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="Autoconnect devices"
+            Command="{Binding OpenAutoconnectDevicesPageCommand}"/>
+        <Button
+            HeightRequest="100"
+            Grid.Row="0"
+            Grid.Column="1"
+            Text="Discover devices"
+            Command="{Binding OpenDiscoverDevicesPageCommand }"/>
+        <Button
+            HeightRequest="100"
+            Grid.Row="1"
+            Grid.Column="0"
+            Text="{Binding OnOffBluetoothText}"
+            Command="{Binding OnOffBluetoothCommand}"/>
+        <Button
+            HeightRequest="100"
+            Grid.Row="1"
+            Grid.Column="1"
+            Text="Scan NFC"
+            Command="{Binding StartScanNfcCommand}"/>
+
+        
+    </Grid>
+    
+    
 </ContentPage>

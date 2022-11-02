@@ -48,7 +48,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //CustomBluetoothGattCallback - в этом классе переопределяются методы,
         //которые срабатывают при обнаружении новых сервисов,
         //чтении, записи, получении новых данных с устройства 
-        public CustomBluetoothGattCallback bluetoothGattCallback;
+        private CustomBluetoothGattCallback bluetoothGattCallback;
 
         private BluetoothGatt _gatt;
 
@@ -66,6 +66,12 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //Событие, срабатывающее после прочтения всех характеристик.
         public event Action EventAfterReading;
 
+        //Флаг, показывающий необходимость в попытках передподключения
+        //при неудачном подключении
+        private bool _isTryReconnect;
+
+        private bool _isDeviceCached;
+
         private static BluetoothAPI _instance;
 
         //В конструкторе происходит инициализация Bluetooth адаптера,
@@ -78,6 +84,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             scanCallback = new CustomScanCallback();
             filters = new List<ScanFilter>();
             CommandQueue = new Queue<Action>();
+
+            _isDeviceCached = true;
 
             scanCallback.BatchScanResultsEvent += BatchScanResults;
             scanCallback.ScanResultEvent += ScanResult;
@@ -92,7 +100,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 .SetCallbackType(ScanCallbackType.AllMatches)
                 .SetMatchMode(BluetoothScanMatchMode.Aggressive)
                 .SetNumOfMatches(1)
-                .SetReportDelay(1000)
+                .SetReportDelay(0)
                 .Build();
         }
 
@@ -128,7 +136,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             {
                 ScannedDevices = scannedDevices;
                 scanner = bluetoothAdapter.BluetoothLeScanner;
-
+                
                 if (scanner != null)
                 {
                     scanner.StartScan(filters: null, settings: scanSettings, callback: scanCallback);
@@ -154,21 +162,33 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //Метод передаётся в качестве события объекту ScanCallback
         public void ScanResult(ScanCallbackType callbackType, ScanResult result)
         {
-            if (filters.Count != 0 && result != null)
+            if (!_isDeviceCached)
             {
-                _gatt = result.Device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le);
-                scanner.StopScan(scanCallback);
-                return;
+                if (filters.Count != 0 && result != null)
+                {
+                    _gatt = result.Device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le);
+                    scanner.StopScan(scanCallback);
+                    _isDeviceCached = true;
+                    return;
+                }
+            }
+            else
+            {
+                var device = ScannedDevices.FirstOrDefault(p => p.Device.Address == result.Device.Address);
+                if (device == null)
+                {
+                    ScannedDevices.Add(new ScannedBluetoothDeviceModel { Name = result.ScanRecord.DeviceName, Device = result.Device });
+                }
             }
         }
 
 
         //Подключение к устройству, которое передаётся в параметрах
-        public async void Connect(BluetoothDevice device)
+        public void Connect(BluetoothDevice device)
         {
             bluetoothDeviceInfo = new BluetoothDeviceInfoModel();
             _device = device;
-            
+            _isTryReconnect = true;
             //Проверка на то, находится ли Bluetooth устройство в кеше Bluetooth.
             //Если нет, то это устройство сканируется отдельно,
             //при этом останавливается общее сканирование.
@@ -176,6 +196,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             BluetoothDevice checkedCacheDevice = bluetoothAdapter.GetRemoteDevice(device.Address);
             if (checkedCacheDevice.Type == BluetoothDeviceType.Unknown)
             {
+                _isDeviceCached = false;
                 filters.Add(new ScanFilter.Builder().SetDeviceAddress(checkedCacheDevice.Address).Build());
                 scanner.StopScan(scanCallback);
                 scanner.StartScan(
@@ -191,7 +212,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             }
             else
             {
-                await Task.Run(() => _gatt = _device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le));
+                _gatt = _device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le);
             }
         }
 
@@ -200,23 +221,23 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         {
             if (_gatt != null)
             {
+                _isTryReconnect = false;
                 _gatt.Disconnect();
             }
-            _gatt = null;
+
             _device = null;
         }
 
         //Метод, выполняющийся при изменении состояния подключения.
-        //Также обрабатывает разрыв соединения и пытается выполнить переподклбчение.
         //Он передаётся в качестве события объекту BluetoothGattCallback
         private void ConnectionStateChange(BluetoothGatt gatt, GattStatus status, ProfileState newState)
         {
-            
             if (status == GattStatus.Success)
             {
                 if (newState == ProfileState.Connected)
                 {
                     //trialConnectedCounter = 0;
+                    _isTryReconnect = false;
                     gatt.DiscoverServices();
                     Read();
                 }
@@ -227,7 +248,15 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             }
             else
             {
-                gatt.Close();
+                if (_isTryReconnect)
+                {
+                    gatt.Close();
+                    _gatt = _device.ConnectGatt(Application.Context, false, bluetoothGattCallback, BluetoothTransports.Le);
+                }
+                else 
+                {
+                    gatt.Close();
+                }
             }
         }
 

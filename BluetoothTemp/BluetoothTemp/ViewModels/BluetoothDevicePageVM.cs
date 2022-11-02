@@ -120,12 +120,14 @@ namespace BluetoothTemp.ViewModels
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
             using (var context = new ApplicationContext(_dbPath))
             {
+                
                 var bluetotohDeviceWasConnected = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
                 if (bluetotohDeviceWasConnected == null)
                 {
-                    var device = new BluetoothDeviceWasСonnected() { MacAddress = bluetoothDevice.Address, IsAutoconnect = 0, IsNfcWrited = 0 };
+                    var device = new BluetoothDeviceWasСonnected() { Name = this.BluetoothDevice.Name, MacAddress = bluetoothDevice.Address, IsAutoconnect = 0, IsNfcWrited = 0 };
                     context.BluetoothDevicesWasСonnected.Add(device);
                     context.SaveChanges();
+                    isPageLoading = false;
                 }
                 else
                 {

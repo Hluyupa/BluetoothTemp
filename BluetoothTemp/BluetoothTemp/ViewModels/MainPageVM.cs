@@ -25,14 +25,17 @@ namespace BluetoothTemp.ViewModels
         private BluetoothAPI _bluetoothAPI;
 
         //Команда для поиска bluetooth устройств
-        public ICommand ScanDevicesCommand { get; set; }
+        //public ICommand ScanDevicesCommand { get; set; }
 
         //Команда вкл/выкл bluetooth
         public ICommand OnOffBluetoothCommand { get; set; }
         public ICommand StartScanNfcCommand { get; set; }
+       
+        public ICommand OpenAutoconnectDevicesPageCommand { get; set; }
+        public ICommand OpenDiscoverDevicesPageCommand { get; set; }
 
         //Список найденных устройств.
-        public ObservableCollection<ScannedBluetoothDeviceModel> ScannedBluetoothDevicesList { get; set; }
+        
 
         private string onOffBluetoothText;
         public string OnOffBluetoothText
@@ -49,48 +52,46 @@ namespace BluetoothTemp.ViewModels
         }
 
 
-        //Выбранное устрйоство для подключения
-        private ScannedBluetoothDeviceModel selectedBluetoothDevice;
-        public ScannedBluetoothDeviceModel SelectedBluetoothDevice
-        {
-            get 
-            {
-                return selectedBluetoothDevice; 
-            }
-            set 
-            {
-                if (selectedBluetoothDevice != value)
-                {
-                    selectedBluetoothDevice = value;
-                    OpenBluetoothDevicePage();
-                    OnPropertyChanged();
-                }
-            }
-        }
+        
 
         public MainPageVM()
         {
             _bluetoothAPI = BluetoothAPI.GetInstance();
 
             OnOffBluetoothText = _bluetoothAPI.bluetoothAdapter.IsEnabled ? OnOffBluetoothText = "Off Bluetooth" : OnOffBluetoothText = "On Bluetooth";
-            ScannedBluetoothDevicesList = new ObservableCollection<ScannedBluetoothDeviceModel>();
+            
+
+            OpenAutoconnectDevicesPageCommand = new Command(OpenAutoconnectDevicesPage);
+            OpenDiscoverDevicesPageCommand = new Command(OpenDiscoverDevicesPage);
+
+            
 
             OnOffBluetoothCommand = new Command(() => {
                 _bluetoothAPI.OnOffBluetooth(() => OnOffBluetoothText = "Off Bluetooth", () => OnOffBluetoothText = "On Bluetooth");
             });
-            ScanDevicesCommand = new Command(() => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList));
+            //ScanDevicesCommand = new Command(() => );
 
             StartScanNfcCommand = new Command(OpenNfcReaderPage);
         }
 
-        private async void OpenBluetoothDevicePage()
+        
+
+        private async void OpenAutoconnectDevicesPage()
         {
-            var context = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device);
-            context.DisposeEvent = () => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList);
             await App.Current.MainPage.Navigation.PushAsync(
-                new BluetoothDevicePage
+                new AutoconnectDevicesPage
                 {
-                    BindingContext = context
+                    BindingContext = new AutoconnectDevicesPageVM()
+                }
+            );
+        }
+
+        private async void OpenDiscoverDevicesPage()
+        {
+            await App.Current.MainPage.Navigation.PushAsync(
+                new DiscoverDevicesPage
+                {
+                    BindingContext = new DiscoverDevicesPageVM()
                 }
             );
         }

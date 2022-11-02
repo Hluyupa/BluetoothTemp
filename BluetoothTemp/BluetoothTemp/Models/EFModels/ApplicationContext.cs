@@ -13,7 +13,9 @@ namespace BluetoothTemp.Models.EFModels
         public ApplicationContext(string databasePath)
         {
             _databasePath = databasePath;
-            Database.EnsureCreated();
+            //this.Database.EnsureDeleted();
+            //this.Database.Migrate();
+            //Database.EnsureCreated();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -22,6 +24,7 @@ namespace BluetoothTemp.Models.EFModels
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
             modelBuilder.Entity<BluetoothDeviceWasСonnected>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
