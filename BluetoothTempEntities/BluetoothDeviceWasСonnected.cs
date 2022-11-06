@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BluetoothTemp.Models.EFModels
+namespace BluetoothTempEntities
 {
 
     public class BluetoothDeviceWasСonnected
@@ -12,5 +12,6 @@ namespace BluetoothTemp.Models.EFModels
         public string MacAddress { get; set; }
         public int IsAutoconnect{ get; set; }
         public int IsNfcWrited{ get; set; }
+        public int? SerialNumber{ get; set; }
     }
 }

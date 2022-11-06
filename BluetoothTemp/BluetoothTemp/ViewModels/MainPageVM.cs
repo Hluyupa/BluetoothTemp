@@ -19,7 +19,7 @@ using Xamarin.Forms;
 
 namespace BluetoothTemp.ViewModels
 {
-    public class MainPageVM : BaseViewModel, INotifyPropertyChanged
+    public class MainPageVM : BaseViewModel
     {
         //Объект класса для работы с Bluetooth
         private BluetoothAPI _bluetoothAPI;

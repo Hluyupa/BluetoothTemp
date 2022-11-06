@@ -4,7 +4,6 @@ using Xamarin.Forms.Xaml;
 using BluetoothTemp.Views;
 using Android.App;
 using BluetoothTemp.Abstract;
-using BluetoothTemp.Models.EFModels;
 
 namespace BluetoothTemp
 {

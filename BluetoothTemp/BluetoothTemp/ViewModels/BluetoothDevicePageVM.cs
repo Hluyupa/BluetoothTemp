@@ -1,10 +1,11 @@
 ﻿using Android.Bluetooth;
 using BluetoothTemp.Abstract;
 using BluetoothTemp.Models;
-using BluetoothTemp.Models.EFModels;
 using BluetoothTemp.TelephoneServices.Bluetooth;
+using BluetoothTempEntities;
 using Java.IO;
 using Java.Util;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -120,11 +121,10 @@ namespace BluetoothTemp.ViewModels
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
             using (var context = new ApplicationContext(_dbPath))
             {
-                
                 var bluetotohDeviceWasConnected = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
                 if (bluetotohDeviceWasConnected == null)
                 {
-                    var device = new BluetoothDeviceWasСonnected() { Name = this.BluetoothDevice.Name, MacAddress = bluetoothDevice.Address, IsAutoconnect = 0, IsNfcWrited = 0 };
+                    var device = new BluetoothDeviceWasСonnected { Name = this.BluetoothDevice.Name, MacAddress = bluetoothDevice.Address, IsAutoconnect = 0, IsNfcWrited = 0 };
                     context.BluetoothDevicesWasСonnected.Add(device);
                     context.SaveChanges();
                     isPageLoading = false;
@@ -166,7 +166,7 @@ namespace BluetoothTemp.ViewModels
         public void Dispose()
         {
             bluetoothAPI.Disconnect();
-            DisposeEvent();
+            DisposeEvent?.Invoke();
         }
     }
 }

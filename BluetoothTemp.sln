@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothTemp.Android", "Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BluetoothTemp", "BluetoothTemp\BluetoothTemp\BluetoothTemp.csproj", "{A975D43A-8B48-49CD-9ADB-6317F0DA6FDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothTempEntities", "BluetoothTempEntities\BluetoothTempEntities.csproj", "{404056EB-4082-4999-932D-0C9DE7BA3F21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateMigrations", "CreateMigrations\CreateMigrations.csproj", "{CEB80DDE-EECC-437A-82ED-444A2C822866}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,30 @@ Global
 		{A975D43A-8B48-49CD-9ADB-6317F0DA6FDE}.Release|iPhone.Build.0 = Release|Any CPU
 		{A975D43A-8B48-49CD-9ADB-6317F0DA6FDE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{A975D43A-8B48-49CD-9ADB-6317F0DA6FDE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|iPhone.Build.0 = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{404056EB-4082-4999-932D-0C9DE7BA3F21}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|iPhone.Build.0 = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{CEB80DDE-EECC-437A-82ED-444A2C822866}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

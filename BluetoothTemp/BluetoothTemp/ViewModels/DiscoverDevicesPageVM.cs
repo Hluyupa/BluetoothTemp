@@ -5,6 +5,7 @@ using BluetoothTemp.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -42,21 +43,18 @@ namespace BluetoothTemp.ViewModels
             ScannedBluetoothDevicesList = new ObservableCollection<ScannedBluetoothDeviceModel>();
             TappedBluetoothDeviceCommand = new Command(OpenBluetoothDevicePage);
 
-            _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList);
+            _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
         }
 
         private async void OpenBluetoothDevicePage()
-        {
-            var context = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device);
-
-            context.DisposeEvent = () => _bluetoothAPI.GetScanDevices(ScannedBluetoothDevicesList);
-
+        {           
             await App.Current.MainPage.Navigation.PushAsync(
                 new BluetoothDevicePage
                 {
-                    BindingContext = context
-                }
+                    BindingContext = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device)
+                }       
             );
+           
         }
     }
 }

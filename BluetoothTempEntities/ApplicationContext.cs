@@ -3,18 +3,23 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BluetoothTemp.Models.EFModels
+namespace BluetoothTempEntities
 {
     public class ApplicationContext : DbContext
     {
         private string _databasePath;
         public DbSet<BluetoothDeviceWasСonnected> BluetoothDevicesWasСonnected { get; set; }
 
+        public ApplicationContext()
+        {
+
+        }
         public ApplicationContext(string databasePath)
         {
             _databasePath = databasePath;
             //this.Database.EnsureDeleted();
-            //this.Database.Migrate();
+            this.Database.Migrate();
+            
             //Database.EnsureCreated();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
