@@ -12,12 +12,12 @@ using Xamarin.Forms;
 
 namespace BluetoothTemp.ViewModels
 {
-    public class DiscoverDevicesPageVM : BaseViewModel
+    public class DiscoverDevicesPageVM : BaseViewModel, INavigationVM
     {
         public ICommand TappedBluetoothDeviceCommand { get; set; }
         public ObservableCollection<ScannedBluetoothDeviceModel> ScannedBluetoothDevicesList { get; set; }
 
-        private BluetoothAPI _bluetoothAPI;
+        
 
         //Выбранное устрйоство для подключения
         private ScannedBluetoothDeviceModel selectedBluetoothDevice;
@@ -37,24 +37,69 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
+        private bool bluetoothState;
+        public bool BluetoothState
+        {
+            get
+            {
+                return bluetoothState;
+            }
+            set
+            {
+                bluetoothState = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private BluetoothAPI _bluetoothAPI;
+
+        private IBluetoothStateChanged _bluetoothStateChangedReciever;
+
         public DiscoverDevicesPageVM()
         {
             _bluetoothAPI = BluetoothAPI.GetInstance();
+            _bluetoothStateChangedReciever = DependencyService.Get<IBluetoothStateChanged>();
             ScannedBluetoothDevicesList = new ObservableCollection<ScannedBluetoothDeviceModel>();
             TappedBluetoothDeviceCommand = new Command(OpenBluetoothDevicePage);
-
-            _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
         }
 
         private async void OpenBluetoothDevicePage()
-        {           
+        {
             await App.Current.MainPage.Navigation.PushAsync(
                 new BluetoothDevicePage
                 {
                     BindingContext = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device)
-                }       
+                }
             );
-           
+        }
+
+        public void OnAppearing()
+        {
+            BluetoothState = _bluetoothAPI.BluetoothAdapter.IsEnabled;
+
+            _bluetoothStateChangedReciever.SetOnBluetoothEvent(() =>
+            {
+                BluetoothState = true;
+                _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
+            });
+            _bluetoothStateChangedReciever.SetOffBluetoothEvent(() =>
+            {
+                BluetoothState = false;
+                _bluetoothAPI.Disconnect();
+                ScannedBluetoothDevicesList.Clear();
+            });
+
+            if (BluetoothState)
+            {
+                _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
+            }
+        }
+
+        public void OnDisappearing()
+        {
+            _bluetoothStateChangedReciever.ClearEvents();
+            ScannedBluetoothDevicesList.Clear();
+            _bluetoothAPI.StopScanDevices();
         }
     }
 }

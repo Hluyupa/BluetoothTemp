@@ -16,9 +16,10 @@ namespace BluetoothTemp
            
             InitializeComponent();
             NfcAPI = nfcAPI;
-            
-            
-            MainPage = new NavigationPage(new MainPage());
+
+
+            //MainPage = new NavigationPage(new MainPage());
+            MainPage = new CustomTemplatePage();
         }
 
         protected override void OnStart()

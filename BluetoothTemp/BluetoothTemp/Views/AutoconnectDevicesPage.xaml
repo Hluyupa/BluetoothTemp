@@ -1,18 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BluetoothTemp.Views.AutoconnectDevicesPage">
+             xmlns:viewmodels="clr-namespace:BluetoothTemp.ViewModels"
+             xmlns:converters="clr-namespace:BluetoothTemp.Views.ValueConverters"
+             x:Class="BluetoothTemp.Views.AutoconnectDevicesPage"
+             Title="Автоподключение">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:ConnectStatusToColorConverter x:Key="StatusConnectConverter"/>
+            <converters:TrueToFalseConverter x:Key="VisibleConverter"/>
+            <converters:ToCelsiusConverter x:Key="CelsiusConverter"/>
+            <converters:ToBatteryLevelPercentConverter x:Key="BatteryLevelConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <viewmodels:AutoconnectDevicesPageVM x:Name="ViewModel"/>
+    </ContentPage.BindingContext>
     <ContentPage.Content>
         <Grid>
-            
+           
+            <Label
+                Text="Для автоподключения к устройствам необходим включенный Blueooth"
+                IsVisible="{Binding Converter={StaticResource VisibleConverter}, Path=BluetoothState}"/>
             <ListView
-               
+                SelectedItem="{Binding SelectedAutoconnectDevice}"
+                IsVisible="{Binding BluetoothState}"
                 ItemsSource="{Binding AutoconnectDevicesList}"
                 HasUnevenRows="True">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Grid>
+                            <Grid
+                                BackgroundColor="{ Binding Converter={StaticResource StatusConnectConverter}, Path=StatusConnect }">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
@@ -20,6 +39,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Label
                                     Grid.Row="0"
@@ -30,18 +50,44 @@
                                 <Label
                                     Grid.Row="1"
                                     Grid.Column="0"
-                                    Text="{Binding StatusConnect}"
+                                    Text="{Binding SerialNumber}"
                                     FontSize="16"/>
-                                <Label
+                                <StackLayout
+                                    Margin="0, 5, 0, 5"
                                     Grid.Row="0"
                                     Grid.Column="1"
-                                    Text="{Binding Temperature}"
-                                    FontSize="16"/>
-                                <Label
+                                    Orientation="Horizontal">
+                                    
+                                    <Image
+                                        HeightRequest="25"
+                                        Source="temperature128x128.png"/>
+                                    <Label
+                                        Text="{Binding Temperature, Converter={StaticResource CelsiusConverter}}"
+                                        FontSize="16"/>
+                                </StackLayout>
+
+                                <StackLayout
+                                    Margin="0, 5, 0, 5"
                                     Grid.Row="1"
                                     Grid.Column="1"
-                                    Text="{Binding BatteryLevel}"
-                                    FontSize="16"/>
+                                    Orientation="Horizontal">
+                                    <Image
+                                        HeightRequest="25"
+                                        Source="batteryCharge512x512.png"/>
+                                    <Label
+                                        Text="{Binding BatteryLevel, Converter={StaticResource BatteryLevelConverter}}"
+                                        FontSize="16"/>
+                                </StackLayout>
+                                <ImageButton
+                                    Margin="0, 0, 20, 0"
+                                    WidthRequest="22"
+                                    BackgroundColor="Transparent"
+                                    Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="2"
+                                    Command="{Binding DeleteDeviceCommand, Source={x:Reference ViewModel}}"
+                                    CommandParameter="{Binding MacAddress}"
+                                    Source="deleteIcon512x512.png"/>
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

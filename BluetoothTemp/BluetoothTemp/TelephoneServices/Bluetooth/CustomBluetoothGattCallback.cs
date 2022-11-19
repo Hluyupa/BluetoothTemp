@@ -14,8 +14,9 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         public event Action<BluetoothGattCharacteristic> CharacteristicReadEvent;
         public event Action<BluetoothGattCharacteristic> CharacteristicChangedEvent;
         public event Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChangeEvent;
+        public event Action<BluetoothGatt, GattStatus> ServicesDiscoveredEvent;
 
-        public event Action ServicesDiscoveredEvent;
+        
 
         public override void OnConnectionStateChange(BluetoothGatt gatt, [GeneratedEnum] GattStatus status, [GeneratedEnum] ProfileState newState)
         {
@@ -32,6 +33,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 gatt.Disconnect();
                 return;
             }
+            ServicesDiscoveredEvent?.Invoke(gatt, status);
         }
 
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, [GeneratedEnum] GattStatus status)

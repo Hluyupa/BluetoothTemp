@@ -3,103 +3,74 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BluetoothTemp.Views.BluetoothDevicePage"
              Title="{Binding Path=BluetoothDevice.Name}">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
-           
-        </Grid.RowDefinitions>
-        <Label
-            
-            Grid.Row="0"
-            HorizontalOptions="Center"
-            VerticalOptions="Start"
-            Text="{Binding ConnectionInfo}"
-            FontSize="24"
-            TextColor="Black"/>
-        <ListView
-            Grid.Row="1"
-            ItemsSource="{Binding DeviceCharacteristicsList}"
-            HasUnevenRows="True">
-            
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <Label
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Text="{Binding Name}"
-                                TextColor="Black"
-                                FontSize="24"/>
-                            <Label
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Text="{Binding Value}"
-                                FontSize="16"/>
-                            <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding UUID}"
-                                FontSize="16"/>
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <Grid
-            Margin="10"
-            Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
-            <Label
-                FontSize="18"
-                Grid.Column="0"
-                Text="Установка автоподключения:"/>
-            <Switch
-                Grid.Column="1"
-                IsToggled="{Binding IsAutoconnect}"/>
-        </Grid>
-        
-
-        <!--<Grid
-            Grid.Row="1"
-            HorizontalOptions="Fill"
-            VerticalOptions="Fill">
+    <ContentPage.Content>
+        <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
+
             </Grid.RowDefinitions>
-            
             <Label
-                Text="{Binding OutputInfo}"
-                Grid.Row="0"/>
+                Grid.Row="0"
+                HorizontalOptions="Center"
+                VerticalOptions="Start"
+                Text="{Binding ConnectionInfo}"
+                FontSize="24"
+                TextColor="Black"/>
+            <ListView
+                Grid.Row="1"
+                ItemsSource="{Binding DeviceCharacteristicsList}"
+                HasUnevenRows="True">
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="{Binding Name}"
+                                    TextColor="Black"
+                                    FontSize="24"/>
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Text="{Binding Value}"
+                                    FontSize="16"/>
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding UUID}"
+                                    FontSize="16"/>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
             <Grid
-                Grid.Row="1">
+                Margin="10"
+                Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Entry
-                    
-                    Text="{Binding InputInfo}"
-                    Grid.Column="0"/>
-                <Button
-                    Command="{Binding SendMessage}"
-                    Text="Send"
-                    Grid.Column="1"/>
+                <Label
+                    FontSize="18"
+                    Grid.Column="0"
+                    Text="Установка автоподключения:"/>
+                <Switch
+                    Grid.Column="1"
+                    IsToggled="{Binding IsAutoconnect}"/>
             </Grid>
-        </Grid>-->
-    </Grid>
+        </Grid>
+    </ContentPage.Content>
 </ContentPage>

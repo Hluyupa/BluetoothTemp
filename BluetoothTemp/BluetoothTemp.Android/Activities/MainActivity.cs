@@ -14,14 +14,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Forms.Internals;
 using BluetoothTemp.Droid.Callbacks.NfcCallback;
+using BluetoothTemp.Droid.BroadcastReceivers;
+using Android.Bluetooth;
+using Xamarin.Forms;
+using BluetoothTemp.Abstract;
 
 namespace BluetoothTemp.Droid.Activities
 {
-    [Activity(Label = "BluetoothTemp", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Label = "BluetoothTemp", Icon = "@mipmap/icon", Exported = true, Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-      
 
+        BluetoothStateChangedReceiver receiver;
         private readonly string[] Permissions =
         {
             Manifest.Permission.BluetoothScan,
@@ -38,16 +42,26 @@ namespace BluetoothTemp.Droid.Activities
 
             global::Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            //RequestPermissions(Permissions, 2);
-            /*RequestPermissions(new string[] { Manifest.Permission.AccessCoarseLocation, Manifest.Permission.AccessFineLocation } , 2);*/
+            
 
             CheckPermissions();
-            //RequestPermissions(Permissions, 2);
+            receiver = new BluetoothStateChangedReceiver();
             LoadApplication(new App(new NfcAPI(this)));
-            
         }
 
-       
+        protected override void OnResume()
+        {
+            base.OnResume();
+         
+            RegisterReceiver(receiver, new IntentFilter(BluetoothAdapter.ActionStateChanged));
+        }
+
+        protected override void OnPause()
+        {
+            base.OnPause();
+            UnregisterReceiver(receiver);
+        }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);

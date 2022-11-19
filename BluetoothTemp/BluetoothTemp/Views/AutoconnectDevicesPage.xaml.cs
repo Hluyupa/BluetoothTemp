@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BluetoothTemp.Abstract;
+using BluetoothTemp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +17,19 @@ namespace BluetoothTemp.Views
         public AutoconnectDevicesPage()
         {
             InitializeComponent();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            var viewModel = (AutoconnectDevicesPageVM)this.BindingContext;
+            (viewModel as INavigationVM)?.OnAppearing();
+        }
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            var viewModel = (AutoconnectDevicesPageVM)this.BindingContext;
+            (viewModel as INavigationVM)?.OnDisappearing();
         }
     }
 }

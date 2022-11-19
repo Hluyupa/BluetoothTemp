@@ -21,7 +21,6 @@ namespace BluetoothTemp.Droid
     {
         public string GetDatabasePath(string filename)
         {
-          
             return Path.Combine(FileSystem.AppDataDirectory, filename);
         }
     }

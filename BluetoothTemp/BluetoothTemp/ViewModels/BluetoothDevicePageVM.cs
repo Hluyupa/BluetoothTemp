@@ -20,7 +20,7 @@ using Xamarin.Forms;
 
 namespace BluetoothTemp.ViewModels
 {
-    public class BluetoothDevicePageVM : BaseViewModel, INotifyPropertyChanged, IDisposable
+    public class BluetoothDevicePageVM : BaseViewModel, IDisposable
     {
         //Событие уничтожения объекта
         public Action DisposeEvent;
@@ -138,24 +138,43 @@ namespace BluetoothTemp.ViewModels
 
         private void AfterReadingInfo()
         {
-            Device.BeginInvokeOnMainThread(async () => 
+            using (var context = new ApplicationContext(_dbPath))
             {
-                bool request = await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Вы хотите записать серийный номер устройства в NFC метку", "Да", "Нет");
-                if (request)
+                var device = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == BluetoothDevice.Address);
+            
+                if (Convert.ToBoolean(device.IsNfcWrited))
                 {
-                    App.NfcAPI.StartScanning();
-                    App.NfcAPI.Write(DeviceCharacteristicsList.FirstOrDefault(p => p.Name.Equals("Серийный номер")).Value);
-                    bool canceled =  await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Поднесите устройство к NFC метке для записи", null, "Отмена");
-                    if (canceled)
-                    {
-                        App.NfcAPI.StopScanning();
-                    }
+                    return;
                 }
-            });
+                else
+                {
+                    Device.BeginInvokeOnMainThread(async () =>
+                    {
+                        bool request = await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Вы хотите записать серийный номер устройства в NFC метку", "Да", "Нет");
+                        if (request)
+                        {
+                            App.NfcAPI.StartScanning();
+                            App.NfcAPI.Write(DeviceCharacteristicsList.FirstOrDefault(p => p.Name.Equals("Серийный номер")).Value);
+                            bool canceled = await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Поднесите устройство к NFC метке для записи", null, "Отмена");
+                            if (canceled)
+                            {
+                                App.NfcAPI.StopScanning();
+                            }
+                            
+                        }
+                    });
+                }
+            }
         }
 
         private void AfterWritingNfc()
         {
+            using (var context = new ApplicationContext(_dbPath))
+            {
+                var device = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == BluetoothDevice.Address);
+                device.IsNfcWrited = Convert.ToInt32(true);
+                context.SaveChanges();
+            }
             Device.BeginInvokeOnMainThread(async () =>
             {
                 await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Запись произошла успешна", "Ок");
@@ -165,6 +184,7 @@ namespace BluetoothTemp.ViewModels
 
         public void Dispose()
         {
+            bluetoothAPI.EventAfterReading -= AfterReadingInfo;
             bluetoothAPI.Disconnect();
             DisposeEvent?.Invoke();
         }

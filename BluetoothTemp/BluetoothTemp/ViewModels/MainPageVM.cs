@@ -58,7 +58,7 @@ namespace BluetoothTemp.ViewModels
         {
             _bluetoothAPI = BluetoothAPI.GetInstance();
 
-            OnOffBluetoothText = _bluetoothAPI.bluetoothAdapter.IsEnabled ? OnOffBluetoothText = "Off Bluetooth" : OnOffBluetoothText = "On Bluetooth";
+            OnOffBluetoothText = _bluetoothAPI.BluetoothAdapter.IsEnabled ? OnOffBluetoothText = "Off Bluetooth" : OnOffBluetoothText = "On Bluetooth";
             
 
             OpenAutoconnectDevicesPageCommand = new Command(OpenAutoconnectDevicesPage);
