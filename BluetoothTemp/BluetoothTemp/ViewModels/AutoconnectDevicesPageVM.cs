@@ -81,7 +81,7 @@ namespace BluetoothTemp.ViewModels
 
 
 
-        public void ShowAutoconnectDevices()
+        public async void ShowAutoconnectDevices()
         {
             using (var context = new ApplicationContext(_dbPath))
             {
@@ -93,6 +93,10 @@ namespace BluetoothTemp.ViewModels
                         AutoconnectDevicesList.Add(new AutoconnectDeviceModel { Name = device.Name, MacAddress = device.MacAddress, StatusConnect = 0 });
                     }
                 }
+                else
+                {
+                    await App.Current.MainPage.DisplayAlert("Ошибка", "Добавьте как минимум одно Bluetooth устройство в список автоматически подключаемых устройств", "Ок");
+                }
             }
             if (AutoconnectDevicesList.Count != 0)
                 _bluetoothAPI.AutoconnectToDevices(AutoconnectDevicesList);
@@ -100,17 +104,25 @@ namespace BluetoothTemp.ViewModels
             
         }
 
-        public void DeleteDevice(string macAddress)
+        public async void DeleteDevice(string macAddress)
         {
             using (var context = new ApplicationContext(_dbPath))
             {
-                _bluetoothAPI.Disconnect(macAddress);
-                AutoconnectDevicesList.Remove(AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress));
-                context.BluetoothDevicesWasСonnected.Remove(context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == macAddress));
-                context.SaveChanges();
+                var removedDevice = AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress);
+
+                var responce = await App.Current.MainPage.DisplayAlert("Удаление", "Вы уверены, что хотите удалить выбранное устройство из списка?", "Да", "Нет");
+                if (responce && removedDevice.StatusConnect != 1)
+                {
+                    _bluetoothAPI.Disconnect(macAddress);
+                    AutoconnectDevicesList.Remove(AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress));
+                    context.BluetoothDevicesWasСonnected.Remove(context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == macAddress));
+                    context.SaveChanges();
+                }
+                else if (removedDevice.StatusConnect == 1) 
+                {
+                    await App.Current.MainPage.DisplayAlert("Ошибка", "Невозможно удалить устройство из списка во время подключения", "Ок");
+                }
             }
-            
-            
         }
 
         public void OnAppearing()

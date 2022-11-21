@@ -1,5 +1,6 @@
 ﻿using Android.Bluetooth;
 using BluetoothTemp.Abstract;
+using BluetoothTemp.Abstract.EventsArgs;
 using BluetoothTemp.Models;
 using BluetoothTemp.TelephoneServices.Bluetooth;
 using BluetoothTempEntities;
@@ -136,8 +137,9 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-        private void AfterReadingInfo()
+        private void AfterReadingInfo(object sender, AfterReadingEventArgs args)
         {
+            
             using (var context = new ApplicationContext(_dbPath))
             {
                 var device = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == BluetoothDevice.Address);
@@ -154,7 +156,7 @@ namespace BluetoothTemp.ViewModels
                         if (request)
                         {
                             App.NfcAPI.StartScanning();
-                            App.NfcAPI.Write(DeviceCharacteristicsList.FirstOrDefault(p => p.Name.Equals("Серийный номер")).Value);
+                            App.NfcAPI.Write(args.DeviceCharacteristics.FirstOrDefault(p => p.Name.Equals("Серийный номер")).Value);
                             bool canceled = await App.Current.MainPage.Navigation.NavigationStack.Last().DisplayAlert("NFC", "Поднесите устройство к NFC метке для записи", null, "Отмена");
                             if (canceled)
                             {

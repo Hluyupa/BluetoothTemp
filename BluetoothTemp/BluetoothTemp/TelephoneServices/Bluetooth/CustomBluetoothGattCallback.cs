@@ -11,10 +11,10 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
     public class CustomBluetoothGattCallback : BluetoothGattCallback
     {
-        public event Action<BluetoothGattCharacteristic> CharacteristicReadEvent;
-        public event Action<BluetoothGattCharacteristic> CharacteristicChangedEvent;
-        public event Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChangeEvent;
-        public event Action<BluetoothGatt, GattStatus> ServicesDiscoveredEvent;
+        public Action<BluetoothGattCharacteristic> CharacteristicReadEvent;
+        public Action<BluetoothGattCharacteristic> CharacteristicChangedEvent;
+        public Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChangeEvent;
+        public Action<BluetoothGatt, GattStatus> ServicesDiscoveredEvent;
 
         
 

@@ -2,6 +2,7 @@
 using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using BluetoothTemp.Abstract;
+using BluetoothTemp.Abstract.EventsArgs;
 using BluetoothTemp.Models;
 using Java.Util;
 using Newtonsoft.Json;
@@ -69,6 +70,9 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //Очередь команд
         public Queue<Action> CommandQueue;
 
+        //Очередь команд, нацеленных на работу с подключением и отключением
+        public Queue<Action> BluetoothNetworkCommandQueue;
+
         //Очередь устройств на подключение
         public Queue<Action> ConnectDeviceQueue;
 
@@ -76,7 +80,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         public BluetoothDeviceInfoModel bluetoothDeviceInfo { get; set; }
 
         //Событие, срабатывающее после прочтения всех характеристик.
-        public event Action EventAfterReading;
+        public event EventHandler<AfterReadingEventArgs> EventAfterReading;
 
         //Флаг, показывающий необходимость в попытках передподключения
         //при неудачном подключении
@@ -134,10 +138,10 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             scanCallback.ScanResultEvent += ScanResult;
 
             bluetoothGattCallback = new CustomBluetoothGattCallback();
-            bluetoothGattCallback.ConnectionStateChangeEvent += ConnectionStateChange;
-            bluetoothGattCallback.CharacteristicReadEvent += CharacteristicRead;
-            bluetoothGattCallback.CharacteristicChangedEvent += CharacteristicChanged;
-            bluetoothGattCallback.ServicesDiscoveredEvent += ServicesDiscovered;
+            bluetoothGattCallback.ConnectionStateChangeEvent = ConnectionStateChange;
+            bluetoothGattCallback.CharacteristicReadEvent = CharacteristicRead;
+            bluetoothGattCallback.CharacteristicChangedEvent = CharacteristicChanged;
+            bluetoothGattCallback.ServicesDiscoveredEvent = ServicesDiscovered;
         }
 
         public static BluetoothAPI GetInstance()
@@ -299,7 +303,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 {
                     DisconnectDeviceQueue.Enqueue(() => connectedDevice.Value.Disconnect());
                 }
-                _connectedGattDevices.Clear();
+                //_connectedGattDevices.Clear();
                 DisconnectDeviceQueue.Peek().Invoke();
             }
             _device = null;
@@ -318,7 +322,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             {
                 if (newState == ProfileState.Connected)
                 {
-                    //trialConnectedCounter = 0;
                     _isTryReconnect = false;
                     _gatt = _connectedGattDevices[gatt.Device.Address];
                     gatt.DiscoverServices();
@@ -326,7 +329,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     {
                         AutoconnectDevices.FirstOrDefault(p => p.MacAddress.Equals(gatt.Device.Address)).StatusConnect = 2;
                     }
-                    //Read(gatt.Device.Address);
                 }
                 else if (newState == ProfileState.Disconnected)
                 {
@@ -338,6 +340,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     else
                     {
                         gatt.Close();
+                        _connectedGattDevices.Remove(gatt.Device.Address);
                         DisconnectDeviceQueue.Dequeue();
                         if (DisconnectDeviceQueue.Count > 0)
                             DisconnectDeviceQueue.Peek().Invoke();
@@ -353,13 +356,19 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
                 else 
                 {
-                    _connectedGattDevices.Remove(gatt.Device.Address);
-                    gatt.Close();
-                    /*DisconnectDeviceQueue.Dequeue();
-                    if (DisconnectDeviceQueue.Count > 0)
+                    if (DisconnectDeviceQueue.Count == 0)
                     {
-                        DisconnectDeviceQueue.Peek().Invoke();
-                    }*/
+                        _connectedGattDevices.Remove(gatt.Device.Address);
+                        gatt.Close();
+                    }
+                    else
+                    {
+                        gatt.Close();
+                        _connectedGattDevices.Remove(gatt.Device.Address);
+                        DisconnectDeviceQueue.Dequeue();
+                        if (DisconnectDeviceQueue.Count > 0)
+                            DisconnectDeviceQueue.Peek().Invoke();
+                    }
                 }
             }
         }
@@ -464,7 +473,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
                 else
                 {
-                    EventAfterReading?.Invoke();
+                    EventAfterReading?.Invoke(this, new AfterReadingEventArgs { DeviceCharacteristics = this.DeviceCharacterisctics });
                 }
                 
             }
