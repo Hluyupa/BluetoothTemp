@@ -11,18 +11,24 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
     public class CustomBluetoothGattCallback : BluetoothGattCallback
     {
-        public Action<BluetoothGattCharacteristic> CharacteristicReadEvent;
-        public Action<BluetoothGattCharacteristic> CharacteristicChangedEvent;
-        public Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChangeEvent;
-        public Action<BluetoothGatt, GattStatus> ServicesDiscoveredEvent;
+        private readonly Action<BluetoothGattCharacteristic> CharacteristicRead;
+        private readonly Action<BluetoothGattCharacteristic> CharacteristicChanged;
+        private readonly Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChange;
+        private readonly Action<BluetoothGatt, GattStatus> ServicesDiscovered;
 
-        
+        public CustomBluetoothGattCallback(Action<BluetoothGattCharacteristic> characteristicRead, Action<BluetoothGatt, GattStatus, ProfileState> connectionStateChange, Action<BluetoothGatt, GattStatus> servicesDiscovered, Action<BluetoothGattCharacteristic> characteristicChanged = null)
+        {
+            CharacteristicRead = characteristicRead;
+            CharacteristicChanged = characteristicChanged;
+            ConnectionStateChange = connectionStateChange;
+            ServicesDiscovered = servicesDiscovered;
+        }
 
         public override void OnConnectionStateChange(BluetoothGatt gatt, [GeneratedEnum] GattStatus status, [GeneratedEnum] ProfileState newState)
         {
             base.OnConnectionStateChange(gatt, status, newState);
 
-            ConnectionStateChangeEvent?.Invoke(gatt, status, newState);
+            ConnectionStateChange.Invoke(gatt, status, newState);
         }
 
         public override void OnServicesDiscovered(BluetoothGatt gatt, [GeneratedEnum] GattStatus status)
@@ -33,21 +39,21 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 gatt.Disconnect();
                 return;
             }
-            ServicesDiscoveredEvent?.Invoke(gatt, status);
+            ServicesDiscovered.Invoke(gatt, status);
         }
 
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, [GeneratedEnum] GattStatus status)
         {
             base.OnCharacteristicRead(gatt, characteristic, status);
             
-            CharacteristicReadEvent?.Invoke(characteristic);
+            CharacteristicRead.Invoke(characteristic);
         }
 
         public override void OnCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
         {
             base.OnCharacteristicChanged(gatt, characteristic);
             
-            CharacteristicChangedEvent?.Invoke(characteristic);
+            CharacteristicChanged?.Invoke(characteristic);
         }
     }
 }

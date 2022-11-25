@@ -6,8 +6,8 @@ namespace BluetoothTemp.Abstract
 {
     public interface IBluetoothStateChanged
     {
-        void SetOnBluetoothEvent(Action action);
-        void SetOffBluetoothEvent(Action action);
+        void SetOnBluetoothEvent(EventHandler action);
+        void SetOffBluetoothEvent(EventHandler action);
         void ClearEvents();
     }
 }

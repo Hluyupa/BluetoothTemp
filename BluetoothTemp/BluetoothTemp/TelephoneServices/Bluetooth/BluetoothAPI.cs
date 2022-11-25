@@ -68,15 +68,15 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         public ICollection<AutoconnectDeviceModel> AutoconnectDevices { get; set; }
 
         //Очередь команд
-        public Queue<Action> CommandQueue;
+        private Queue<Action> CommandQueue;
 
-        //Очередь команд, нацеленных на работу с подключением и отключением
+        //Очередь команд, нацеленных на работу с подключение    
         public Queue<Action> BluetoothNetworkCommandQueue;
 
         //Очередь устройств на подключение
-        public Queue<Action> ConnectDeviceQueue;
+        private Queue<Action> ConnectDeviceQueue;
 
-        public Queue<Action> DisconnectDeviceQueue;
+        private Queue<Action> DisconnectDeviceQueue;
         public BluetoothDeviceInfoModel bluetoothDeviceInfo { get; set; }
 
         //Событие, срабатывающее после прочтения всех характеристик.
@@ -95,8 +95,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //Флаг, информирующий о старте очереди
         private bool _isQueueStarted;
 
-        private string _readbleDeviceMacAddress;
-
         private static BluetoothAPI _instance;
 
         //В конструкторе происходит инициализация Bluetooth адаптера,
@@ -107,16 +105,14 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             BluetoothAdapter = bluetoothManager.Adapter;
             
 
-            scanCallback = new CustomScanCallback();
+            scanCallback = new CustomScanCallback(scanResult: ScanResult);
             filters = new List<ScanFilter>();
             _connectedGattDevices = new Dictionary<string, BluetoothGatt>();
             CommandQueue = new Queue<Action>();
             ConnectDeviceQueue = new Queue<Action>();
             DisconnectDeviceQueue = new Queue<Action>();
             
-
             _scanner = BluetoothAdapter.BluetoothLeScanner;
-
             _scanSettingsForDiscovery = new ScanSettings.Builder()
                 .SetScanMode(Android.Bluetooth.LE.ScanMode.LowLatency)
                 .SetCallbackType(ScanCallbackType.AllMatches)
@@ -135,13 +131,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             _isDeviceCached = true;
             _isAutoConnect = false;
             _isQueueStarted = false;
-            scanCallback.ScanResultEvent += ScanResult;
 
-            bluetoothGattCallback = new CustomBluetoothGattCallback();
-            bluetoothGattCallback.ConnectionStateChangeEvent = ConnectionStateChange;
-            bluetoothGattCallback.CharacteristicReadEvent = CharacteristicRead;
-            bluetoothGattCallback.CharacteristicChangedEvent = CharacteristicChanged;
-            bluetoothGattCallback.ServicesDiscoveredEvent = ServicesDiscovered;
+            bluetoothGattCallback = new CustomBluetoothGattCallback(connectionStateChange: ConnectionStateChange, characteristicRead: CharacteristicRead, servicesDiscovered: ServicesDiscovered);
         }
 
         public static BluetoothAPI GetInstance()
@@ -151,22 +142,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 _instance = new BluetoothAPI();
             }
             return _instance;
-        }
-
-        //Метод включения и выключения Bluetooth.
-        //Принимает события на включение и выключение Bluetooth.
-        public void OnOffBluetooth(Action enableHandler, Action disableHandler)
-        {
-            if (BluetoothAdapter.IsEnabled)
-            {
-                BluetoothAdapter.Disable();
-                disableHandler();
-            }
-            else
-            {
-                BluetoothAdapter.Enable();
-                enableHandler();
-            }
         }
 
         //Метод автоматического поделючения к устройствам через мак-адреса,
@@ -261,7 +236,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             }
             else
             {
-                _connectedGattDevices.Add(_device.Address, _device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le));
+                _device.ConnectGatt(Application.Context, false, bluetoothGattCallback, transport: BluetoothTransports.Le);
             }
         }
 
@@ -278,11 +253,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 else
                 {
                     StopScanDevices();
-                    AutoconnectDevices.Remove(AutoconnectDevices.FirstOrDefault(p => p.MacAddress == macAddress));
-                    if (AutoconnectDevices.Count != 0) 
-                    {
-                        AutoconnectToDevices(AutoconnectDevices);
-                    }
                 }
                 return;
             }
@@ -303,7 +273,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 {
                     DisconnectDeviceQueue.Enqueue(() => connectedDevice.Value.Disconnect());
                 }
-                //_connectedGattDevices.Clear();
                 DisconnectDeviceQueue.Peek().Invoke();
             }
             _device = null;
@@ -323,6 +292,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 if (newState == ProfileState.Connected)
                 {
                     _isTryReconnect = false;
+                    _connectedGattDevices.Add(gatt.Device.Address, gatt);
                     _gatt = _connectedGattDevices[gatt.Device.Address];
                     gatt.DiscoverServices();
                     if (_isAutoConnect)
@@ -332,19 +302,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
                 else if (newState == ProfileState.Disconnected)
                 {
-                    if (DisconnectDeviceQueue.Count == 0)
-                    {
-                        _connectedGattDevices.Remove(gatt.Device.Address);
-                        gatt.Close();
-                    }
-                    else
-                    {
-                        gatt.Close();
-                        _connectedGattDevices.Remove(gatt.Device.Address);
-                        DisconnectDeviceQueue.Dequeue();
-                        if (DisconnectDeviceQueue.Count > 0)
-                            DisconnectDeviceQueue.Peek().Invoke();
-                    }
+                    DisconnectHandler(gatt);
                 }
             }
             else
@@ -356,20 +314,25 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                 }
                 else 
                 {
-                    if (DisconnectDeviceQueue.Count == 0)
-                    {
-                        _connectedGattDevices.Remove(gatt.Device.Address);
-                        gatt.Close();
-                    }
-                    else
-                    {
-                        gatt.Close();
-                        _connectedGattDevices.Remove(gatt.Device.Address);
-                        DisconnectDeviceQueue.Dequeue();
-                        if (DisconnectDeviceQueue.Count > 0)
-                            DisconnectDeviceQueue.Peek().Invoke();
-                    }
+                    DisconnectHandler(gatt);
                 }
+            }
+        }
+
+        private void DisconnectHandler(BluetoothGatt gatt)
+        {
+            if (DisconnectDeviceQueue.Count == 0)
+            {
+                _connectedGattDevices.Remove(gatt.Device.Address);
+                gatt.Close();
+            }
+            else
+            {
+                gatt.Close();
+                _connectedGattDevices.Remove(gatt.Device.Address);
+                DisconnectDeviceQueue.Dequeue();
+                if (DisconnectDeviceQueue.Count > 0)
+                    DisconnectDeviceQueue.Peek().Invoke();
             }
         }
 
@@ -440,16 +403,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     break;
             }
             CompletedCommand();
-        }
-
-        //Метод, выполняющийся при получении уведомления об обновлении характеристики.
-        //Он передаётся в качестве события объекту BluetoothGattCallback
-        private void CharacteristicChanged(BluetoothGattCharacteristic characteristic)
-        {
-            byte[] buffer = new byte[characteristic.GetValue().Length];
-            Array.Copy(characteristic.GetValue(), 0, buffer, 0, characteristic.GetValue().Length);
-            var value = Encoding.UTF8.GetString(buffer);
-            DeviceCharacterisctics.FirstOrDefault(p => p.UUID == characteristic.Uuid.ToString().ToLower().Substring(0, 8)).Value = value;
         }
 
         //Запуск следующей команды

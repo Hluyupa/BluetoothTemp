@@ -12,18 +12,23 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
     public class CustomScanCallback : ScanCallback
     {
-        public Action<IList<ScanResult>> BatchScanResultsEvent { get; set; }
-        public Action<ScanCallbackType, ScanResult> ScanResultEvent { get; set; }
+        private readonly Action<IList<ScanResult>> BatchScanResults;
+        private readonly Action<ScanCallbackType, ScanResult> ScanResult;
 
+        public CustomScanCallback(Action<ScanCallbackType, ScanResult> scanResult, Action<IList<ScanResult>> batchScanResults = null)
+        {
+            ScanResult = scanResult;
+            BatchScanResults = batchScanResults;
+        }
         public override void OnScanResult([GeneratedEnum] ScanCallbackType callbackType, ScanResult result)
         {
             base.OnScanResult(callbackType, result);
-            ScanResultEvent.Invoke(callbackType, result);
+            ScanResult.Invoke(callbackType, result);
         }
         public override void OnBatchScanResults(IList<ScanResult> results)
         {
             base.OnBatchScanResults(results);
-            BatchScanResultsEvent.Invoke(results);
+            BatchScanResults.Invoke(results);
             
         }
 

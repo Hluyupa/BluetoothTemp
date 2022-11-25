@@ -11,13 +11,13 @@
                 <RowDefinition Height="auto"/>
 
             </Grid.RowDefinitions>
-            <Label
+            <!--<Label
                 Grid.Row="0"
                 HorizontalOptions="Center"
                 VerticalOptions="Start"
                 Text="{Binding ConnectionInfo}"
                 FontSize="24"
-                TextColor="Black"/>
+                TextColor="Black"/>-->
             <ListView
                 Grid.Row="1"
                 ItemsSource="{Binding DeviceCharacteristicsList}"

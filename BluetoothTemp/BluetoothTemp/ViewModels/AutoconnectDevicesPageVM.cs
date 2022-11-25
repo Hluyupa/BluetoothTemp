@@ -64,6 +64,20 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
+        private bool isAutoconnectDeviceDetected;
+        public bool IsAutoconnectDeviceDetected
+        {
+            get
+            {
+                return isAutoconnectDeviceDetected;
+            }
+            set
+            {
+                isAutoconnectDeviceDetected = value;
+                OnPropertyChanged();
+            }
+        }
+
         private IBluetoothStateChanged _bluetoothStateChangedReciever;
 
         private BluetoothAPI _bluetoothAPI;
@@ -79,15 +93,14 @@ namespace BluetoothTemp.ViewModels
            
         }
 
-
-
-        public async void ShowAutoconnectDevices()
+        public void ShowAutoconnectDevices()
         {
             using (var context = new ApplicationContext(_dbPath))
             {
                 var devices = context.BluetoothDevicesWasСonnected.Where(p => p.IsAutoconnect == Convert.ToInt32(true)).ToList();
-                if (devices != null)
+                if (devices != null && devices.Count != 0)
                 {
+                    IsAutoconnectDeviceDetected = true;
                     foreach (var device in devices)
                     {
                         AutoconnectDevicesList.Add(new AutoconnectDeviceModel { Name = device.Name, MacAddress = device.MacAddress, StatusConnect = 0 });
@@ -95,7 +108,7 @@ namespace BluetoothTemp.ViewModels
                 }
                 else
                 {
-                    await App.Current.MainPage.DisplayAlert("Ошибка", "Добавьте как минимум одно Bluetooth устройство в список автоматически подключаемых устройств", "Ок");
+                    IsAutoconnectDeviceDetected = false;
                 }
             }
             if (AutoconnectDevicesList.Count != 0)
@@ -115,8 +128,14 @@ namespace BluetoothTemp.ViewModels
                 {
                     _bluetoothAPI.Disconnect(macAddress);
                     AutoconnectDevicesList.Remove(AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress));
+
+                    if (AutoconnectDevicesList.Count != 0)
+                        _bluetoothAPI.AutoconnectToDevices(AutoconnectDevicesList);
+                    else
+                        IsAutoconnectDeviceDetected = false;
+
                     context.BluetoothDevicesWasСonnected.Remove(context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == macAddress));
-                    context.SaveChanges();
+                    context.SaveChanges();                    
                 }
                 else if (removedDevice.StatusConnect == 1) 
                 {
@@ -125,20 +144,24 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
+        private void OnBluetoothEventHandler(object sender, EventArgs args)
+        {
+            BluetoothState = true;
+            ShowAutoconnectDevices();
+        }
+
+        private void OffBluetoothEventHandler(object sender, EventArgs args)
+        {
+            BluetoothState = false;
+            _bluetoothAPI.Disconnect();
+            AutoconnectDevicesList.Clear();
+        }
+
         public void OnAppearing()
         {
             BluetoothState = _bluetoothAPI.BluetoothAdapter.IsEnabled;
-            _bluetoothStateChangedReciever.SetOnBluetoothEvent(() =>
-            {
-                BluetoothState = true;
-                ShowAutoconnectDevices();
-            });
-            _bluetoothStateChangedReciever.SetOffBluetoothEvent(() =>
-            {
-                BluetoothState = false;
-                _bluetoothAPI.Disconnect();
-                AutoconnectDevicesList.Clear();
-            });
+            _bluetoothStateChangedReciever.SetOnBluetoothEvent(OnBluetoothEventHandler);
+            _bluetoothStateChangedReciever.SetOffBluetoothEvent(OffBluetoothEventHandler);
 
             if (BluetoothState)
             {

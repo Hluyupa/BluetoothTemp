@@ -22,18 +22,18 @@ namespace BluetoothTemp.Droid.BroadcastReceivers
     [IntentFilter(new[] { BluetoothAdapter.ActionStateChanged })]
     public class BluetoothStateChangedReceiver : BroadcastReceiver, IBluetoothStateChanged
     {
-        public static event Action OnBluetoothEvent;
-        public static event Action OffBluetoothEvent;
+        public static event EventHandler OnBluetoothEvent;
+        public static event EventHandler OffBluetoothEvent;
 
         private static int _status;
 
-        public void SetOnBluetoothEvent(Action action)
+        public void SetOnBluetoothEvent(EventHandler eventHandler)
         {
-            OnBluetoothEvent += action;
+            OnBluetoothEvent += eventHandler;
         }
-        public void SetOffBluetoothEvent(Action action)
+        public void SetOffBluetoothEvent(EventHandler eventHandler)
         {
-            OffBluetoothEvent = action;
+            OffBluetoothEvent = eventHandler;
         }
         public void ClearEvents()
         {
@@ -48,14 +48,13 @@ namespace BluetoothTemp.Droid.BroadcastReceivers
                 switch (state)
                 {
                     case (int)State.On:
-                        OnBluetoothEvent?.Invoke();
+                        OnBluetoothEvent?.Invoke(this, EventArgs.Empty);
                         _status = state;
-                        Toast.MakeText(context, "On", ToastLength.Short).Show();
+                        
                         break;
                     case (int)State.Off:
-                        OffBluetoothEvent?.Invoke();
+                        OffBluetoothEvent?.Invoke(this, EventArgs.Empty);
                         _status = state;
-                        Toast.MakeText(context, "Off", ToastLength.Short).Show();
                         break;
                     default:
                         break;

@@ -116,7 +116,7 @@ namespace BluetoothTemp.ViewModels
 
             ConnectionInfo = "Waiting connection";
             bluetoothAPI.Connect(BluetoothDevice);
-            bluetoothAPI.EventAfterReading += AfterReadingInfo;
+            bluetoothAPI.EventAfterReading += AfterReadingInfoHandler;
             App.NfcAPI.WritingNfcEvent += AfterWritingNfc;
 
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
@@ -137,7 +137,7 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-        private void AfterReadingInfo(object sender, AfterReadingEventArgs args)
+        private void AfterReadingInfoHandler(object sender, AfterReadingEventArgs args)
         {
             
             using (var context = new ApplicationContext(_dbPath))
@@ -186,7 +186,7 @@ namespace BluetoothTemp.ViewModels
 
         public void Dispose()
         {
-            bluetoothAPI.EventAfterReading -= AfterReadingInfo;
+            bluetoothAPI.EventAfterReading -= AfterReadingInfoHandler;
             bluetoothAPI.Disconnect();
             DisposeEvent?.Invoke();
         }

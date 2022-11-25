@@ -73,21 +73,25 @@ namespace BluetoothTemp.ViewModels
             );
         }
 
+        private void OnBluetoothEventHandler(object sender, EventArgs args)
+        {
+            BluetoothState = true;
+            _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
+        }
+
+        private void OffBluetoothEventHandler(object sender, EventArgs args)
+        {
+            BluetoothState = false;
+            _bluetoothAPI.Disconnect();
+            ScannedBluetoothDevicesList.Clear();
+        }
+
         public void OnAppearing()
         {
             BluetoothState = _bluetoothAPI.BluetoothAdapter.IsEnabled;
 
-            _bluetoothStateChangedReciever.SetOnBluetoothEvent(() =>
-            {
-                BluetoothState = true;
-                _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
-            });
-            _bluetoothStateChangedReciever.SetOffBluetoothEvent(() =>
-            {
-                BluetoothState = false;
-                _bluetoothAPI.Disconnect();
-                ScannedBluetoothDevicesList.Clear();
-            });
+            _bluetoothStateChangedReciever.SetOnBluetoothEvent(OnBluetoothEventHandler);
+            _bluetoothStateChangedReciever.SetOffBluetoothEvent(OffBluetoothEventHandler);
 
             if (BluetoothState)
             {

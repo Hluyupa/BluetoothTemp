@@ -18,81 +18,86 @@
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <Grid>
-           
             <Label
                 Text="Для автоподключения к устройствам необходим включенный Blueooth"
                 IsVisible="{Binding Converter={StaticResource VisibleConverter}, Path=BluetoothState}"/>
-            <ListView
-                SelectedItem="{Binding SelectedAutoconnectDevice}"
-                IsVisible="{Binding BluetoothState}"
-                ItemsSource="{Binding AutoconnectDevicesList}"
-                HasUnevenRows="True">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Grid
+            <Grid
+                IsVisible="{Binding BluetoothState}">
+                <Label
+                    Text="Добавьте как минимум одно Bluetooth устройство в список автоматически подключаемых устройств"
+                    IsVisible="{Binding Converter={StaticResource VisibleConverter}, Path=IsAutoconnectDeviceDetected}"/>
+                <ListView
+                    SelectedItem="{Binding SelectedAutoconnectDevice}"
+                    IsVisible="{Binding IsAutoconnectDeviceDetected}"
+                    ItemsSource="{Binding AutoconnectDevicesList}"
+                    HasUnevenRows="True">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid
                                 BackgroundColor="{ Binding Converter={StaticResource StatusConnectConverter}, Path=StatusConnect }">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Label
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    Text="{Binding Name}"
-                                    TextColor="Black"
-                                    FontSize="24"/>
-                                <Label
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Text="{Binding SerialNumber}"
-                                    FontSize="16"/>
-                                <StackLayout
-                                    Margin="0, 5, 0, 5"
-                                    Grid.Row="0"
-                                    Grid.Column="1"
-                                    Orientation="Horizontal">
-                                    
-                                    <Image
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Text="{Binding Name}"
+                                        TextColor="Black"
+                                        FontSize="24"/>
+                                    <Label
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Text="{Binding SerialNumber}"
+                                        FontSize="16"/>
+                                    <StackLayout
+                                        Margin="0, 5, 0, 5"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Orientation="Horizontal">
+
+                                        <Image
                                         HeightRequest="25"
                                         Source="temperature128x128.png"/>
-                                    <Label
+                                        <Label
                                         Text="{Binding Temperature, Converter={StaticResource CelsiusConverter}}"
                                         FontSize="16"/>
-                                </StackLayout>
+                                    </StackLayout>
 
-                                <StackLayout
-                                    Margin="0, 5, 0, 5"
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Orientation="Horizontal">
-                                    <Image
-                                        HeightRequest="25"
-                                        Source="batteryCharge512x512.png"/>
-                                    <Label
-                                        Text="{Binding BatteryLevel, Converter={StaticResource BatteryLevelConverter}}"
-                                        FontSize="16"/>
-                                </StackLayout>
-                                <ImageButton
-                                    Margin="0, 0, 20, 0"
-                                    WidthRequest="22"
-                                    BackgroundColor="Transparent"
-                                    Grid.Row="0"
-                                    Grid.RowSpan="2"
-                                    Grid.Column="2"
-                                    Command="{Binding DeleteDeviceCommand, Source={x:Reference ViewModel}}"
-                                    CommandParameter="{Binding MacAddress}"
-                                    Source="deleteIcon512x512.png"/>
-                            </Grid>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                    <StackLayout
+                                        Margin="0, 5, 0, 5"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Orientation="Horizontal">
+                                        <Image
+                                            HeightRequest="25"
+                                            Source="batteryCharge512x512.png"/>
+                                        <Label
+                                            Text="{Binding BatteryLevel, Converter={StaticResource BatteryLevelConverter}}"
+                                            FontSize="16"/>
+                                    </StackLayout>
+                                    <ImageButton
+                                        Margin="0, 0, 20, 0"
+                                        WidthRequest="22"
+                                        BackgroundColor="Transparent"
+                                        Grid.Row="0"
+                                        Grid.RowSpan="2"
+                                        Grid.Column="2"
+                                        Command="{Binding DeleteDeviceCommand, Source={x:Reference ViewModel}}"
+                                        CommandParameter="{Binding MacAddress}"
+                                        Source="deleteIcon512x512.png"/>
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
         </Grid>
     </ContentPage.Content>
 </ContentPage>
