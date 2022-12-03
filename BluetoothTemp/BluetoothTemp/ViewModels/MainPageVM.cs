@@ -64,13 +64,6 @@ namespace BluetoothTemp.ViewModels
             OpenAutoconnectDevicesPageCommand = new Command(OpenAutoconnectDevicesPage);
             OpenDiscoverDevicesPageCommand = new Command(OpenDiscoverDevicesPage);
 
-            
-
-            OnOffBluetoothCommand = new Command(() => {
-                _bluetoothAPI.OnOffBluetooth(() => OnOffBluetoothText = "Off Bluetooth", () => OnOffBluetoothText = "On Bluetooth");
-            });
-            //ScanDevicesCommand = new Command(() => );
-
             StartScanNfcCommand = new Command(OpenNfcReaderPage);
         }
 

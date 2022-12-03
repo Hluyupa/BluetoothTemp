@@ -112,7 +112,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             ConnectDeviceQueue = new Queue<Action>();
             DisconnectDeviceQueue = new Queue<Action>();
             
-            _scanner = BluetoothAdapter.BluetoothLeScanner;
+           
             _scanSettingsForDiscovery = new ScanSettings.Builder()
                 .SetScanMode(Android.Bluetooth.LE.ScanMode.LowLatency)
                 .SetCallbackType(ScanCallbackType.AllMatches)
@@ -150,6 +150,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         {
             if (BluetoothAdapter.IsEnabled)
             {
+                if (_scanner == null)
+                    _scanner = BluetoothAdapter.BluetoothLeScanner;
                 AutoconnectDevices = autoconnectDevices;
                 _isAutoConnect = true;
                 foreach (var device in AutoconnectDevices)
@@ -166,10 +168,9 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             if (BluetoothAdapter.IsEnabled)
             {
                 ScannedDevices = scannedDevices;
-                if (_scanner != null)
-                {
-                    _scanner.StartScan(filters: null, settings: _scanSettingsForDiscovery, callback: scanCallback);
-                }
+                if (_scanner == null)
+                    _scanner = BluetoothAdapter.BluetoothLeScanner;
+                _scanner.StartScan(filters: null, settings: _scanSettingsForDiscovery, callback: scanCallback);
             }
         }
 
@@ -280,7 +281,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 
         public void StopScanDevices()
         {
-            _scanner.StopScan(scanCallback);
+            if (_scanner != null)
+                _scanner.StopScan(scanCallback);
         }
 
         //Метод, выполняющийся при изменении состояния подключения.
