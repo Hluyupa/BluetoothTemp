@@ -76,13 +76,13 @@ namespace BluetoothTemp.ViewModels
         private void OnBluetoothEventHandler(object sender, EventArgs args)
         {
             BluetoothState = true;
-            _bluetoothAPI.ScanDevices(ScannedBluetoothDevicesList);
+            _bluetoothAPI?.ScanDevices(ScannedBluetoothDevicesList);
         }
 
         private void OffBluetoothEventHandler(object sender, EventArgs args)
         {
             BluetoothState = false;
-            _bluetoothAPI.Disconnect();
+            _bluetoothAPI?.Disconnect();
             ScannedBluetoothDevicesList.Clear();
         }
 

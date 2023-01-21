@@ -31,10 +31,5 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             BatchScanResults.Invoke(results);
             
         }
-
-        public override void OnScanFailed([GeneratedEnum] ScanFailure errorCode)
-        {
-            base.OnScanFailed(errorCode);
-        }
     }
 }

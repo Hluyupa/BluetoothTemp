@@ -25,10 +25,10 @@
 
   <ItemGroup>
     <Reference Include="Java.Interop">
-      <HintPath>D:\Program Files\Visual Studio 2022\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v1.0\Java.Interop.dll</HintPath>
+      <HintPath>C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v1.0\Java.Interop.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android">
-      <HintPath>D:\Program Files\Visual Studio 2022\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v12.0\Mono.Android.dll</HintPath>
+      <HintPath>C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v12.0\Mono.Android.dll</HintPath>
     </Reference>
   </ItemGroup>
 

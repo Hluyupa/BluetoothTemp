@@ -11,12 +11,12 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
     public class CustomBluetoothGattCallback : BluetoothGattCallback
     {
-        private readonly Action<BluetoothGattCharacteristic> CharacteristicRead;
+        private readonly Action<BluetoothGatt, BluetoothGattCharacteristic> CharacteristicRead;
         private readonly Action<BluetoothGattCharacteristic> CharacteristicChanged;
         private readonly Action<BluetoothGatt, GattStatus, ProfileState> ConnectionStateChange;
         private readonly Action<BluetoothGatt, GattStatus> ServicesDiscovered;
 
-        public CustomBluetoothGattCallback(Action<BluetoothGattCharacteristic> characteristicRead, Action<BluetoothGatt, GattStatus, ProfileState> connectionStateChange, Action<BluetoothGatt, GattStatus> servicesDiscovered, Action<BluetoothGattCharacteristic> characteristicChanged = null)
+        public CustomBluetoothGattCallback(Action<BluetoothGatt, BluetoothGattCharacteristic> characteristicRead, Action<BluetoothGatt, GattStatus, ProfileState> connectionStateChange, Action<BluetoothGatt, GattStatus> servicesDiscovered, Action<BluetoothGattCharacteristic> characteristicChanged = null)
         {
             CharacteristicRead = characteristicRead;
             CharacteristicChanged = characteristicChanged;
@@ -46,7 +46,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         {
             base.OnCharacteristicRead(gatt, characteristic, status);
             
-            CharacteristicRead.Invoke(characteristic);
+            CharacteristicRead.Invoke(gatt, characteristic);
         }
 
         public override void OnCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)

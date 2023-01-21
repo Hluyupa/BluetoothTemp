@@ -15,9 +15,7 @@ namespace BluetoothTemp.ViewModels
 {
     public class AutoconnectDevicesPageVM : BaseViewModel, INavigationVM
     {
-
         public ObservableCollection<AutoconnectDeviceModel> AutoconnectDevicesList { get; set; }
-
         public ICommand DeleteDeviceCommand { get; set; }
 
         private AutoconnectDeviceModel selectedAutoconnectDevice;
@@ -33,7 +31,6 @@ namespace BluetoothTemp.ViewModels
                 OnPropertyChanged();
             }
         }
-
 
         private bool bluetoothState;
         public bool BluetoothState
