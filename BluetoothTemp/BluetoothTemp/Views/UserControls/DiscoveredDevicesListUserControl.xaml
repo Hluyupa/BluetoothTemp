@@ -4,8 +4,7 @@
       x:Class="BluetoothTemp.Views.UserControls.DiscoveredDevicesListUserControl"
       xmlns:behaviors="clr-namespace:Xamarin.CommunityToolkit.Behaviors;assembly=Xamarin.CommunityToolkit">
     <ListView
-        IsVisible="{Binding BluetoothState}"
-        ItemsSource="{Binding ScannedBluetoothDevicesList}"
+        ItemsSource="{Binding SearchResult}"
         SelectedItem="{Binding SelectedBluetoothDevice}"
         HasUnevenRows="True">
         <ListView.Behaviors>
@@ -15,19 +14,39 @@
             <DataTemplate>
                 <ViewCell>
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0.5*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
                         <Label
+                            Grid.Column="0"
                             Grid.Row="0"
                             Text="{Binding Name}"
                             TextColor="Black"
                             FontSize="24"/>
                         <Label
+                            Grid.Column="0"
                             Grid.Row="1"
                             Text="{Binding Device.Address}"
                             FontSize="16"/>
+                        <Switch
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            IsToggled="{Binding IsAutoconnect}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"/>
+                        <Label
+                            Grid.Column="1"
+                            Grid.Row="1"
+                            FontSize="10"
+                            Text="Автоподключение"
+                            VerticalOptions="Start"
+                            HorizontalOptions="Center"/>
+                        
                     </Grid>
                 </ViewCell>
             </DataTemplate>

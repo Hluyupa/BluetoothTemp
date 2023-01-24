@@ -5,6 +5,7 @@ using BluetoothTemp.Abstract;
 using BluetoothTemp.Abstract.EventsArgs;
 using BluetoothTemp.Models;
 using Java.Util;
+using Javax.Security.Auth;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
@@ -15,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
+
 
 namespace BluetoothTemp.TelephoneServices.Bluetooth
 {
@@ -216,10 +218,9 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             ConnectDevice connectableDevice;
             if (!_connectedDevices.TryGetValue(device.Address, out connectableDevice))
             {
-                _connectedDevices.Add(device.Address, new ConnectDevice { Device = device, IsTryReconnect = true, IsDeviceCached = true, ConnectStatus = 0 });
+                _connectedDevices.Add(device.Address, new ConnectDevice { Device = device, IsTryReconnect = true, IsDeviceCached = true, ConnectStatus = 0, CountStepsOfReadTemperature = 0 });
             }
             
-
             //Проверка на то, находится ли Bluetooth устройство в кеше Bluetooth.
             //Если нет, то это устройство сканируется отдельно,
             //при этом останавливается общее сканирование.
@@ -247,13 +248,23 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         {
             if (macAddress != null && _isAutoConnect) 
             {
-                if (_connectedDevices.Count != 0)
+                ConnectDevice connectDevice;
+
+                if (_connectedDevices.TryGetValue(macAddress, out connectDevice))
                 {
-                    _connectedDevices[macAddress].Gatt.Disconnect();
-                }
-                else
-                {
-                    StopScanDevices();
+                    connectDevice.Gatt.Disconnect();
+                    
+                    if (connectDevice.ConnectStatus != 1)
+                        connectDevice.Gatt.Disconnect();
+                    else if (connectDevice.ConnectStatus == 1)
+                    {
+                        Task.Run(async () =>
+                        {
+                            connectDevice.Gatt.Disconnect();
+                            await Task.Delay(100);
+                            connectDevice.Gatt.Close();
+                        });
+                    }
                 }
                 return;
             }
@@ -327,15 +338,18 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             }
             else
             {
-                if (connectDevice.IsTryReconnect)
+                if (connectDevice!=null)
                 {
-                    gatt.Close();
-                    connectDevice.Device.ConnectGatt(Application.Context, false, bluetoothGattCallback, BluetoothTransports.Le);
+                    if (connectDevice.IsTryReconnect)
+                    {
+                        gatt.Close();
+                        connectDevice.Device.ConnectGatt(Application.Context, false, bluetoothGattCallback, BluetoothTransports.Le);
+                    }
+                    else
+                        gatt.Close();
                 }
-                else 
-                {
+                else
                     gatt.Close();
-                }
             }
         }
 
@@ -378,14 +392,27 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
             string value = Encoding.UTF8.GetString(buffer);
             string uuidHeader = characteristic.Uuid.ToString().ToLower().Substring(0, 8);
 
-            //var gattQueueRead = QueuesOfRead.FirstOrDefault(p => p.MacAddress == gatt.Device.Address);
+            var connectedDevice = _connectedDevices[gatt.Device.Address];
 
             switch (uuidHeader)
             {
                 case "00002a1f":
                     if (value == "-127.00")
                     {
-                        //gattQueueRead.QueueOfReadCharateristics.Enqueue(() => gatt.ReadCharacteristic(characteristic));
+                        if (connectedDevice.CountStepsOfReadTemperature < 2)
+                        {
+                            connectedDevice.QueueOfReadCharateristics.Enqueue(() => gatt.ReadCharacteristic(characteristic));
+                            connectedDevice.CountStepsOfReadTemperature++;
+                        }
+                        else
+                        {
+                            bluetoothDevicesInfo[gatt.Device.Address].Temperature = "Ошибка";
+                            if (_isAutoConnect)
+                                AutoconnectDevices.FirstOrDefault(p => p.MacAddress.Equals(gatt.Device.Address)).Temperature = "Ошибка";
+                            else
+                                DeviceCharacterisctics.Add(new DeviceCharacteristicModel { Name = "Температура", Value = "Ошибка", UUID = uuidHeader });
+                        }
+                        
                     }
                     else
                     {
@@ -413,16 +440,17 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     DeviceCharacterisctics.Add(new DeviceCharacteristicModel { Name = "N/A", Value = value, UUID = uuidHeader });
                     break;
             }
-            var connectedDevice = _connectedDevices[gatt.Device.Address];
+
+            
+            
             if (connectedDevice.QueueOfReadCharateristics.Count > 0)
-            {
                 connectedDevice.QueueOfReadCharateristics.Dequeue().Invoke();
-            }
             else
             {
                 connectedDevice.QueueOfReadCharateristics.Clear();
                 var deviceInfo = bluetoothDevicesInfo[gatt.Device.Address];
                 CompositeAndSendJson(deviceInfo);
+                EventAfterReading?.Invoke(this, new AfterReadingEventArgs { DeviceCharacteristics = DeviceCharacterisctics});
                 bluetoothDevicesInfo.Remove(gatt.Device.Address);
             }
         }

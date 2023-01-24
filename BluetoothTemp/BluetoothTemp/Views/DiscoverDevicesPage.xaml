@@ -17,12 +17,29 @@
     <ContentPage.BindingContext>
         <viewmodels:DiscoverDevicesPageVM/>
     </ContentPage.BindingContext>
+
+    <Shell.SearchHandler>
+        <SearchHandler
+            Placeholder="Поиск..."
+            Query="{Binding SearchDeviceNameText}">
+        </SearchHandler>
+    </Shell.SearchHandler>
+    
     <ContentPage.Content>
         <Grid>
             <Label
                 Text="Для поиска близжайших устройств необходим включенный Blueooth"
                 IsVisible="{Binding Converter={StaticResource VisibleConverter}, Path=BluetoothState}"/>
-            <usercontrols:DiscoveredDevicesListUserControl/>
+            <Grid
+                IsVisible="{Binding BluetoothState}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <usercontrols:DiscoveredDevicesListUserControl
+                    Grid.Row="1"/>
+            </Grid>
+            
         </Grid>
     </ContentPage.Content>
 </ContentPage>

@@ -11,9 +11,9 @@ namespace BluetoothTemp.Views.ValueConverters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
-            {
                 return "N/A";
-            }
+            else if (value.ToString() == "Ошибка")
+                return "Ошибка";
             return $"{value.ToString()}°C";
         }
 

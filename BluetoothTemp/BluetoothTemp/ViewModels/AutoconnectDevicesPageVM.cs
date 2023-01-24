@@ -17,6 +17,7 @@ namespace BluetoothTemp.ViewModels
     {
         public ObservableCollection<AutoconnectDeviceModel> AutoconnectDevicesList { get; set; }
         public ICommand DeleteDeviceCommand { get; set; }
+        public ICommand RefreshPageCommand { get; set; }
 
         private AutoconnectDeviceModel selectedAutoconnectDevice;
         public AutoconnectDeviceModel SelectedAutoconnectDevice
@@ -46,7 +47,6 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-
         private bool isBluetoothEnabled;
         public bool IsBluetoothEnabled
         {
@@ -75,6 +75,21 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
+        private bool isRefreshing;
+        public bool IsRefreshing
+        {
+            get 
+            {
+                return isRefreshing; 
+            }
+            set
+            {
+                isRefreshing = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         private IBluetoothStateChanged _bluetoothStateChangedReciever;
 
         private BluetoothAPI _bluetoothAPI;
@@ -83,11 +98,13 @@ namespace BluetoothTemp.ViewModels
         public AutoconnectDevicesPageVM()
         {
             DeleteDeviceCommand = new Command<string>(DeleteDevice);
+            RefreshPageCommand = new Command(RefreshPage);
+
             _bluetoothAPI = BluetoothAPI.GetInstance();
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
             _bluetoothStateChangedReciever = DependencyService.Get<IBluetoothStateChanged>();
+
             AutoconnectDevicesList = new ObservableCollection<AutoconnectDeviceModel>();
-           
         }
 
         public void ShowAutoconnectDevices()
@@ -121,24 +138,30 @@ namespace BluetoothTemp.ViewModels
                 var removedDevice = AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress);
 
                 var responce = await App.Current.MainPage.DisplayAlert("Удаление", "Вы уверены, что хотите удалить выбранное устройство из списка?", "Да", "Нет");
-                if (responce && removedDevice.StatusConnect != 1)
+                if (responce)
                 {
-                    _bluetoothAPI.Disconnect(macAddress);
                     AutoconnectDevicesList.Remove(AutoconnectDevicesList.FirstOrDefault(p => p.MacAddress == macAddress));
-
-                    if (AutoconnectDevicesList.Count != 0)
-                        _bluetoothAPI.AutoconnectToDevices(AutoconnectDevicesList);
-                    else
+                    _bluetoothAPI.Disconnect(macAddress);
+                    if (AutoconnectDevicesList.Count == 0)
                         IsAutoconnectDeviceDetected = false;
 
                     context.BluetoothDevicesWasСonnected.Remove(context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == macAddress));
                     context.SaveChanges();                    
                 }
-                else if (removedDevice.StatusConnect == 1) 
+                /*else if (removedDevice.StatusConnect == 1) 
                 {
                     await App.Current.MainPage.DisplayAlert("Ошибка", "Невозможно удалить устройство из списка во время подключения", "Ок");
-                }
+                }*/
             }
+        }
+
+        private void RefreshPage()
+        {
+            IsRefreshing= true;
+            _bluetoothAPI.Disconnect();
+            AutoconnectDevicesList.Clear();
+            ShowAutoconnectDevices();
+            IsRefreshing = false;
         }
 
         private void OnBluetoothEventHandler(object sender, EventArgs args)

@@ -13,5 +13,6 @@ namespace BluetoothTemp.Models
         public Queue<Action> QueueOfReadCharateristics { get; set; }
         public BluetoothGatt Gatt { get; set; }
         public int ConnectStatus { get; set; }
+        public int CountStepsOfReadTemperature { get; set; }
     }
 }

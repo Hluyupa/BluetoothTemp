@@ -122,6 +122,7 @@ namespace BluetoothTemp.ViewModels
             _dbPath = DependencyService.Get<IPath>().GetDatabasePath(App.DbFilename);
             using (var context = new ApplicationContext(_dbPath))
             {
+                
                 var bluetotohDeviceWasConnected = context.BluetoothDevicesWasСonnected.FirstOrDefault(p => p.MacAddress == this.BluetoothDevice.Address);
                 if (bluetotohDeviceWasConnected == null)
                 {
