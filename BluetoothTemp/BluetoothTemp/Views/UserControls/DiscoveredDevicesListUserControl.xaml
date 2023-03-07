@@ -4,8 +4,10 @@
       x:Class="BluetoothTemp.Views.UserControls.DiscoveredDevicesListUserControl"
       xmlns:behaviors="clr-namespace:Xamarin.CommunityToolkit.Behaviors;assembly=Xamarin.CommunityToolkit">
     <ListView
+        
         ItemsSource="{Binding SearchResult}"
         SelectedItem="{Binding SelectedBluetoothDevice}"
+        SelectionMode="None"
         HasUnevenRows="True">
         <ListView.Behaviors>
             <behaviors:EventToCommandBehavior EventName="ItemTapped" Command="{Binding TappedBluetoothDeviceCommand}"/>

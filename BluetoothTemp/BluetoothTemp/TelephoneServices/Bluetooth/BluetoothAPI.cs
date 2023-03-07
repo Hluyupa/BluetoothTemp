@@ -57,8 +57,6 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //чтении, записи, получении новых данных с устройства 
         private CustomBluetoothGattCallback bluetoothGattCallback;
 
-        //private Dictionary<string, BluetoothGatt> _connectedGattDevices;
-
         //Список характеристик подключенного устрйоства. 
         //Необходимо передать извне ссылку на коллекцию.
         public ICollection<DeviceCharacteristicModel> DeviceCharacterisctics { get; set; }
@@ -78,14 +76,11 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
         //Событие, срабатывающее после прочтения всех характеристик.
         public event EventHandler<AfterReadingEventArgs> EventAfterReading;
 
-        
         //Флаг автоподклбючения устройств
         private bool _isAutoConnect;
 
         private static BluetoothAPI _instance;
         
-
-
         //В конструкторе происходит инициализация Bluetooth адаптера,
         //колбеков, списков и настроек сканирования.
         private BluetoothAPI()
@@ -209,8 +204,8 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
                     }
                 }
             }
+            
         }
-
 
         //Подключение к устройству, которое передаётся в параметрах
         public void Connect(BluetoothDevice device)
@@ -252,7 +247,7 @@ namespace BluetoothTemp.TelephoneServices.Bluetooth
 
                 if (_connectedDevices.TryGetValue(macAddress, out connectDevice))
                 {
-                    connectDevice.Gatt.Disconnect();
+                   
                     
                     if (connectDevice.ConnectStatus != 1)
                         connectDevice.Gatt.Disconnect();

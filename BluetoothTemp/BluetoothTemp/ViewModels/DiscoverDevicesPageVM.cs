@@ -149,12 +149,13 @@ namespace BluetoothTemp.ViewModels
             }
         }
 
-        private async void OpenBluetoothDevicePage()
+        private async void OpenBluetoothDevicePage(object args)
         {
+            var scannedDevice = (args as ItemTappedEventArgs).Item as ScannedBluetoothDeviceModel;
             await App.Current.MainPage.Navigation.PushAsync(
                 new BluetoothDevicePage
                 {
-                    BindingContext = new BluetoothDevicePageVM(SelectedBluetoothDevice.Device)
+                    BindingContext = new BluetoothDevicePageVM(scannedDevice.Device)
                 }
             );
         }
